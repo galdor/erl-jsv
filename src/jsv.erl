@@ -25,8 +25,7 @@
               constraint_name/0, constraint_value/0,
               options/0,
               definition_error/0,
-              value_error/0, value_error_reason/0,
-              formatted_value_error/0]).
+              value_error/0, value_error_reason/0]).
 
 -type definition() :: type() | {type(), constraints()}.
 
@@ -48,21 +47,19 @@
                              jsv:constraint(), term()}.
 
 -type value_error() :: #{reason := value_error_reason(),
+                         reason_string => binary(),
                          value := json:value(),
-                         value_path := json_pointer:pointer()}.
+                         value_path := json_pointer:pointer(),
+                         value_path_string => binary()}.
 -type value_error_reason() :: {invalid_type, ExpectedType :: jsv:type()}
                             | {constraint_violation, jsv:type(), constraint()}.
-
--type formatted_value_error() :: #{reason := binary(),
-                                   value := json:value(),
-                                   value_path := binary()}.
 
 -spec validate(json:value(), definition()) -> ok | {error, [value_error()]}.
 validate(Value, Definition) ->
   validate(Value, Definition, #{}).
 
 -spec validate(json:value(), definition(), options()) ->
-        ok | {error, [value_error()]} | {error, [formatted_value_error()]}.
+        ok | {error, [value_error()]}.
 validate(Value, Definition, Options) ->
   State = jsv_validator:init(Value, Definition, Options),
   State2 = jsv_validator:validate(State),
@@ -125,10 +122,10 @@ verify_definition({TypeName, Constraints}, TypeMap) ->
 verify_definition(Definition, _) ->
   {error, [{invalid_format, Definition}]}.
 
--spec format_value_error(value_error(), type_map()) -> formatted_value_error().
-format_value_error(#{reason := Reason,
-                     value := Value,
-                     value_path := ValuePath},
+-spec format_value_error(value_error(), type_map()) -> value_error().
+format_value_error(Error = #{reason := Reason,
+                             value := Value,
+                             value_path := ValuePath},
                    TypeMap) ->
   Msg = case Reason of
           {invalid_type, ExpectedType} ->
@@ -146,12 +143,11 @@ format_value_error(#{reason := Reason,
             io_lib:format(<<"invalid value ~0tp: ~0tp">>,
                           [Value, Reason])
         end,
-  #{reason => iolist_to_binary(Msg),
-    value => Value,
-    value_path => json_pointer:serialize(ValuePath)}.
+  Error#{reason_string => iolist_to_binary(Msg),
+         value_path_string => json_pointer:serialize(ValuePath)}.
 
 -spec format_value_errors([value_error()], type_map()) ->
-        [formatted_value_error()].
+        [value_error()].
 format_value_errors(Errors, TypeMap) ->
   lists:map(fun (Error) -> format_value_error(Error, TypeMap) end, Errors).
 
