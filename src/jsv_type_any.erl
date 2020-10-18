@@ -16,7 +16,26 @@
 
 -behaviour(jsv_type).
 
--export([validate_type/1]).
+-export([verify_constraint/2, format_constraint_violation/1,
+         validate_type/1, validate_constraint/3]).
+
+-export_type([constraint/0]).
+
+-type constraint() :: {value, json:value()}.
+
+verify_constraint({value, _}, _) ->
+  ok;
+verify_constraint(_, _) ->
+  unknown.
+
+format_constraint_violation({value, ExpectedValue}) ->
+  {"value must be equal to ~0tp", [ExpectedValue]}.
 
 validate_type(_) ->
   ok.
+
+validate_constraint(Value, {value, ExpectedValue}, State) when
+    Value == ExpectedValue ->
+  State;
+validate_constraint(_, Constraint = {value, _}, State) ->
+  jsv_validator:add_constraint_violation(Constraint, any, State).

@@ -40,7 +40,11 @@ it or replace it altogether.
 
 ## Default types
 ### any
-Represents any JSON value. The type does not support any constraint.
+Represents any JSON value.
+
+Constraints:
+
+- `value`: a JSON value the value must be equal to.
 
 ### null
 Represents a `null` JSON constant. This type does not support any constraint.
