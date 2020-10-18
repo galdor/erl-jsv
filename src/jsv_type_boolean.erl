@@ -16,7 +16,7 @@
 
 -behaviour(jsv_type).
 
--export([verify_constraint/2, format_constraint_violation/2,
+-export([verify_constraint/2, format_constraint_violation/1,
          validate_type/1, validate_constraint/3]).
 
 -export_type([constraint/0]).
@@ -30,8 +30,8 @@ verify_constraint({value, _}, _) ->
 verify_constraint(_, _) ->
   unknown.
 
-format_constraint_violation(Value, {value, ExpectedValue}) ->
-  {"value ~0tp must be ~0tp", [Value, ExpectedValue]}.
+format_constraint_violation({value, ExpectedValue}) ->
+  {"value must be ~0tp", [ExpectedValue]}.
 
 validate_type(Value) when is_boolean(Value) ->
   ok;

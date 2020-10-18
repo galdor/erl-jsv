@@ -53,6 +53,7 @@
                             | {constraint_violation, jsv:type(), constraint()}.
 
 -type formatted_value_error() :: #{reason := binary(),
+                                   value := json:value(),
                                    value_path := binary()}.
 
 -spec validate(json:value(), definition()) -> ok | {error, [value_error()]}.
@@ -126,7 +127,7 @@ format_value_error(#{reason := Reason,
                           [Value, ExpectedType]);
           {constraint_violation, Type, Constraint} ->
             Module = maps:get(Type, TypeMap),
-            case Module:format_constraint_violation(Value, Constraint) of
+            case Module:format_constraint_violation(Constraint) of
               {Format, Args} ->
                 iolist_to_binary(io_lib:format(Format, Args));
               Data ->
@@ -137,6 +138,7 @@ format_value_error(#{reason := Reason,
                           [Value, Reason])
         end,
   #{reason => iolist_to_binary(Msg),
+    value => Value,
     value_path => json_pointer:serialize(ValuePath)}.
 
 -spec format_value_errors([value_error()], type_map()) ->

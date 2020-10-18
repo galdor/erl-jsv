@@ -16,7 +16,7 @@
 
 -behaviour(jsv_type).
 
--export([verify_constraint/2, format_constraint_violation/2,
+-export([verify_constraint/2, format_constraint_violation/1,
          validate_type/1, validate_constraint/3]).
 
 -export_type([constraint/0]).
@@ -38,10 +38,10 @@ verify_constraint({max_length, _}, _) ->
 verify_constraint(_, _) ->
   unknown.
 
-format_constraint_violation(Value, {min_length, Min}) ->
-  {"value ~0tp must contain at least ~0tp elements", [Value, Min]};
-format_constraint_violation(Value, {max_length, Max}) ->
-  {"value ~0tp must contain at most ~0tp elements", [Value, Max]}.
+format_constraint_violation({min_length, Min}) ->
+  {"value must contain at least ~0tp elements", [Min]};
+format_constraint_violation({max_length, Max}) ->
+  {"value must contain at most ~0tp elements", [Max]}.
 
 validate_type(Value) when is_list(Value) ->
   ok;
