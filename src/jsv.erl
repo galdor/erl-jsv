@@ -155,6 +155,7 @@ format_value_errors(Errors, TypeMap) ->
 default_type_map() ->
   #{null => jsv_type_null,
     boolean => jsv_type_boolean,
+    integer => jsv_type_integer,
     number => jsv_type_number,
     array => jsv_type_array,
     object => jsv_type_object}.
