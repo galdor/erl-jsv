@@ -78,9 +78,16 @@ verify_definition(Definition, TypeMap) when is_atom(Definition) ->
 verify_definition({TypeName, Constraints}, TypeMap) ->
   case maps:find(TypeName, TypeMap) of
     {ok, Module} ->
+      Exported = erlang:function_exported(Module, verify_constraint, 2),
+      VerifyConstraint = case Exported of
+                           true ->
+                             fun (C, TM) -> Module:verify_constraint(C, TM) end;
+                           false ->
+                             fun (_, _) -> unknown end
+                         end,
       F = fun (ConstraintName, ConstraintValue, Errors) ->
               Constraint = {ConstraintName, ConstraintValue},
-              case Module:verify_constraint(Constraint, TypeMap) of
+              case VerifyConstraint(Constraint, TypeMap) of
                 ok ->
                   Errors;
                 unknown ->
