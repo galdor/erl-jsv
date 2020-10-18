@@ -58,6 +58,19 @@ Constraints:
 - `min`: the minimal value of the number.
 - `max`: the maximal value of the number.
 
+### string
+Represents a JSON string.
+
+Constraints:
+
+- `min_length`: the minimal length of the string.
+- `max_length`: the maximum length of the string.
+
+Note that the length of a string is the number of characters in the string,
+and not the number of bytes in its representation. Since erl-jsv relies on the
+erl-json library, all JSON strings are represented by UTF-8 binaries: the
+length of a string is the number of Unicode codepoints.
+
 ### array
 Represents a JSON array.
 

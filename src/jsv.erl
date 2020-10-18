@@ -157,5 +157,6 @@ default_type_map() ->
     boolean => jsv_type_boolean,
     integer => jsv_type_integer,
     number => jsv_type_number,
+    string => jsv_type_string,
     array => jsv_type_array,
     object => jsv_type_object}.
