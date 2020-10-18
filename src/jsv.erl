@@ -146,5 +146,6 @@ format_value_errors(Errors, TypeMap) ->
 
 -spec default_type_map() -> type_map().
 default_type_map() ->
-  #{number => jsv_type_number,
+  #{null => jsv_type_null,
+    number => jsv_type_number,
     array => jsv_type_array}.
