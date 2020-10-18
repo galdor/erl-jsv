@@ -132,9 +132,17 @@ Definition = {array, #{element_type => {integer, #{min => 1}}}},
 jsv:validate([1, 1, 3, 5], Definition).
 ```
 
+Validation functions start by verifying the definition. If verification fails,
+a `{invalid_definition, Errors}` error is signaled. Verification can be
+disabled with the `disable_verification` option. Note that invalid definitions
+can cause obscure errors; definitions should always be verified, either
+automatically by validation functions or separately by calling
+`jsv:verify_definition/2`.
+
+### Options
 For `jsv:validate/3`, the following options are available:
 
 - `type_map`: the type map to use (default: `jsv:default_type_map()`).
 - `format_value_errors`: if validation fails, add textual information to error
   values.
-
+- `disable_verification`: do not verify the definition before validation.

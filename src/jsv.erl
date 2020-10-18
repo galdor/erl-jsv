@@ -38,7 +38,8 @@
 -type constraint_value() :: term().
 
 -type options() :: #{type_map => type_map(),
-                     format_value_errors => boolean()}.
+                     format_value_errors => boolean(),
+                     disable_verification => boolean()}.
 
 -type definition_error() :: {invalid_format, term()}
                           | {unknown_type, type()}
@@ -61,6 +62,18 @@ validate(Value, Definition) ->
 -spec validate(json:value(), definition(), options()) ->
         ok | {error, [value_error()]}.
 validate(Value, Definition, Options) ->
+  TypeMap = maps:get(type_map, Options, default_type_map()),
+  case maps:get(disable_verification, Options, false) of
+    true ->
+      ok;
+    false ->
+      case verify_definition(Definition, TypeMap) of
+        ok ->
+          ok;
+        {error, DefinitionErrors} ->
+          error({invalid_definition, DefinitionErrors})
+      end
+  end,
   State = jsv_validator:init(Value, Definition, Options),
   State2 = jsv_validator:validate(State),
   case jsv_validator:errors(State2) of
@@ -70,7 +83,6 @@ validate(Value, Definition, Options) ->
       Errors2 = lists:reverse(Errors),
       Errors3 = case maps:get(format_value_errors, Options, false) of
                   true ->
-                    TypeMap = maps:get(type_map, Options, default_type_map()),
                     format_value_errors(Errors2, TypeMap);
                   false ->
                     Errors2
