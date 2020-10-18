@@ -39,6 +39,9 @@ default types useful for various kinds of JSON data. Users are free to extend
 it or replace it altogether.
 
 ## Default types
+### any
+Represents any JSON value. The type does not support any constraint.
+
 ### null
 Represents a `null` JSON constant. This type does not support any constraint.
 
