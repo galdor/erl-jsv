@@ -16,7 +16,8 @@
 
 -behaviour(jsv_type).
 
--export([name/0, verify_constraint/2, validate_type/1, validate_constraint/3]).
+-export([name/0, verify_constraint/2, format_constraint_violation/2,
+         validate_type/1, validate_constraint/3]).
 
 -export_type([constraint/0]).
 
@@ -30,16 +31,21 @@ name() ->
 
 verify_constraint({element_type, Definition}, TypeMap) ->
   jsv:verify_definition(Definition, TypeMap);
-verify_constraint({min_length, Value}, _) when is_number(Value) ->
+verify_constraint({min_length, Min}, _) when is_number(Min) ->
   ok;
 verify_constraint({min_length, _}, _) ->
   invalid;
-verify_constraint({max_length, Value}, _) when is_number(Value) ->
+verify_constraint({max_length, Max}, _) when is_number(Max) ->
   ok;
 verify_constraint({max_length, _}, _) ->
   invalid;
 verify_constraint(_, _) ->
   unknown.
+
+format_constraint_violation(Value, {min_length, Min}) ->
+  {"value ~0tp must contain at least ~0tp elements", [Value, Min]};
+format_constraint_violation(Value, {max_length, Max}) ->
+  {"value ~0tp must contain at most ~0tp elements", [Value, Max]}.
 
 validate_type(Value) when is_list(Value) ->
   ok;
@@ -52,21 +58,19 @@ validate_constraint(Value, {element_type, ElementType}, State) ->
                                        integer_to_binary(I), State2)
       end,
   jsv_utils:fold_list_with_index(F, State, Value);
-
 validate_constraint(Value, Constraint = {min_length, Min}, State) when
     is_number(Min) ->
   case length(Value) >= Min of
     true ->
       State;
     false ->
-      jsv_validator:add_constraint_violation(Constraint, State)
+      jsv_validator:add_constraint_violation(Constraint, array, State)
   end;
-
 validate_constraint(Value, Constraint = {max_length, Max}, State) when
     is_number(Max) ->
   case length(Value) =< Max of
     true ->
       State;
     false ->
-      jsv_validator:add_constraint_violation(Constraint, State)
+      jsv_validator:add_constraint_violation(Constraint, array, State)
   end.

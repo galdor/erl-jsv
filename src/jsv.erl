@@ -16,7 +16,8 @@
 
 -export([default_type_map/0,
          validate/2, validate/3,
-         verify_definition/2]).
+         verify_definition/2,
+         format_value_error/2, format_value_errors/2]).
 
 -export_type([definition/0,
               type/0, type_map/0,
@@ -24,7 +25,8 @@
               constraint_name/0, constraint_value/0,
               options/0,
               definition_error/0,
-              value_error/0, value_error_reason/0]).
+              value_error/0, value_error_reason/0,
+              formatted_value_error/0]).
 
 -type definition() :: type() | {type(), constraints()}.
 
@@ -48,7 +50,10 @@
                          value := json:value(),
                          value_path := json_pointer:pointer()}.
 -type value_error_reason() :: {invalid_type, ExpectedType :: jsv:type()}
-                            | {constraint_violation, constraint()}.
+                            | {constraint_violation, jsv:type(), constraint()}.
+
+-type formatted_value_error() :: #{reason := binary(),
+                                   value_path := binary()}.
 
 -spec validate(json:value(), definition()) -> ok | {error, [value_error()]}.
 validate(Value, Definition) ->
@@ -102,6 +107,35 @@ verify_definition({TypeName, Constraints}, TypeMap) ->
   end;
 verify_definition(Definition, _) ->
   {error, [{invalid_format, Definition}]}.
+
+-spec format_value_error(value_error(), type_map()) -> formatted_value_error().
+format_value_error(#{reason := Reason,
+                     value := Value,
+                     value_path := ValuePath},
+                   TypeMap) ->
+  Msg = case Reason of
+          {invalid_type, ExpectedType} ->
+            io_lib:format(<<"value ~0tp is not of type ~0tp">>,
+                          [Value, ExpectedType]);
+          {constraint_violation, Type, Constraint} ->
+            Module = maps:get(Type, TypeMap),
+            case Module:format_constraint_violation(Value, Constraint) of
+              {Format, Args} ->
+                iolist_to_binary(io_lib:format(Format, Args));
+              Data ->
+                unicode:characters_to_binary(Data)
+            end;
+          _ ->
+            io_lib:format(<<"invalid value ~0tp: ~0tp">>,
+                          [Value, Reason])
+        end,
+  #{reason => iolist_to_binary(Msg),
+    value_path => json_pointer:serialize(ValuePath)}.
+
+-spec format_value_errors([value_error()], type_map()) ->
+        [formatted_value_error()].
+format_value_errors(Errors, TypeMap) ->
+  lists:map(fun (Error) -> format_value_error(Error, TypeMap) end, Errors).
 
 -spec default_type_map() -> type_map().
 default_type_map() ->

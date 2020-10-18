@@ -20,6 +20,9 @@
   ok | unknown | invalid | {invalid, term()} |
   {error, [jsv:definition_error()]}.
 
+-callback format_constraint_violation(json:value(), jsv:constraint()) ->
+  unicode:chardata() | {io:format(), [term()]}.
+
 -callback validate_type(json:value()) -> ok | error.
 
 -callback validate_constraint(json:value(), jsv:constraint(),

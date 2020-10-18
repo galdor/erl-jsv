@@ -16,7 +16,8 @@
 
 -behaviour(jsv_type).
 
--export([name/0, verify_constraint/2, validate_type/1, validate_constraint/3]).
+-export([name/0, verify_constraint/2, format_constraint_violation/2,
+         validate_type/1, validate_constraint/3]).
 
 -export_type([constraint/0]).
 
@@ -26,16 +27,21 @@
 name() ->
   number.
 
-verify_constraint({min, Value}, _) when is_number(Value) ->
+verify_constraint({min, Min}, _) when is_number(Min) ->
   ok;
 verify_constraint({min, _}, _) ->
   invalid;
-verify_constraint({max, Value}, _) when is_number(Value) ->
+verify_constraint({max, Max}, _) when is_number(Max) ->
   ok;
 verify_constraint({max, _}, _) ->
   invalid;
 verify_constraint(_, _) ->
   unknown.
+
+format_constraint_violation(Value, {min, Min}) ->
+  {"value ~0tp must be greater or equal to ~0tp", [Value, Min]};
+format_constraint_violation(Value, {max, Max}) ->
+  {"value ~0tp must be lower or equal to ~0tp", [Value, Max]}.
 
 validate_type(Value) when is_number(Value) ->
   ok;
@@ -47,13 +53,12 @@ validate_constraint(Value, Constraint = {min, Min}, State) ->
     true ->
       State;
     false ->
-      jsv_validator:add_constraint_violation(Constraint, State)
+      jsv_validator:add_constraint_violation(Constraint, number, State)
   end;
-
 validate_constraint(Value, Constraint = {max, Max}, State) ->
   case Value =< Max of
     true ->
       State;
     false ->
-      jsv_validator:add_constraint_violation(Constraint, State)
+      jsv_validator:add_constraint_violation(Constraint, number, State)
   end.
