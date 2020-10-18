@@ -1,0 +1,4 @@
+[{<<"json">>,
+  {git,"https://github.com/galdor/erl-json.git",
+       {ref,"ba902b55007b62d6704c3413a653e5e97f5bf4cc"}},
+  0}].
