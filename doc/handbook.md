@@ -50,11 +50,7 @@ Constraints:
 Represents a `null` JSON constant. This type does not support any constraint.
 
 ### boolean
-Represents a JSON boolean value.
-
-Constraints:
-
-- `value`: a boolean constant the value must be equal to.
+Represents a JSON boolean value. This type does not support any constraint.
 
 ### integer
 Represents a JSON number which was parsed as an integer.
