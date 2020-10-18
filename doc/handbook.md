@@ -107,6 +107,21 @@ and `jsv:format_value_errors/2` can be used to add textual information to
 errors.
 
 # Interface
+## Definition verification
+The `jsv:verify_definition/2` function verifies a definition, making sure
+that:
+
+- its structure is correct;
+- referenced types exist in the type map passed to the function;
+- constraints exist for the associated type;
+- constraint values are valid.
+
+Example:
+```erlang
+Definition = {array, #{element_type => {integer, #{min => 1}}}},
+jsv:verify_definition(Definition, jsv:default_type_map()).
+```
+
 ## Validation
 The `jsv:validate/2` and `jsv:validate/3` functions validate a value against a
 definition.
