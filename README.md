@@ -1,5 +1,5 @@
 # Project
-JSV, for JSON Structural Validator, provide a way to validate the structure
+JSV, for JSON Structural Validator, provides a way to validate the structure
 and content of JSON data structures.
 
 While similar to [JSON Schema](https://json-schema.org/) in intent, JSV is
