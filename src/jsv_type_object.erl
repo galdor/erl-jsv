@@ -22,16 +22,16 @@
 -export_type([constraint/0]).
 
 -type constraint() :: {value_type, jsv:definition()}
-                    | {min_size, number()}
-                    | {max_size, number()}.
+                    | {min_size, non_neg_integer()}
+                    | {max_size, non_neg_integer()}.
 
 verify_constraint({value_type, Definition}, TypeMap) ->
   jsv:verify_definition(Definition, TypeMap);
-verify_constraint({min_size, Min}, _) when is_number(Min) ->
+verify_constraint({min_size, Min}, _) when is_integer(Min), Min >= 0 ->
   ok;
 verify_constraint({min_size, _}, _) ->
   invalid;
-verify_constraint({max_size, Max}, _) when is_number(Max) ->
+verify_constraint({max_size, Max}, _) when is_integer(Max), Max >= 0 ->
   ok;
 verify_constraint({max_size, _}, _) ->
   invalid;
