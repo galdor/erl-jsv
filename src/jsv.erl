@@ -49,8 +49,8 @@
 -type value_error() :: #{reason := value_error_reason(),
                          reason_string => binary(),
                          value := json:value(),
-                         value_path := json_pointer:pointer(),
-                         value_path_string => binary()}.
+                         pointer := json_pointer:pointer(),
+                         pointer_string => binary()}.
 -type value_error_reason() :: {invalid_type, ExpectedType :: jsv:type()}
                             | {constraint_violation, jsv:type(), constraint()}.
 
@@ -125,7 +125,7 @@ verify_definition(Definition, _) ->
 -spec format_value_error(value_error(), type_map()) -> value_error().
 format_value_error(Error = #{reason := Reason,
                              value := Value,
-                             value_path := ValuePath},
+                             pointer := Pointer},
                    TypeMap) ->
   Msg = case Reason of
           {invalid_type, ExpectedType} ->
@@ -144,7 +144,7 @@ format_value_error(Error = #{reason := Reason,
                           [Value, Reason])
         end,
   Error#{reason_string => iolist_to_binary(Msg),
-         value_path_string => json_pointer:serialize(ValuePath)}.
+         pointer_string => json_pointer:serialize(Pointer)}.
 
 -spec format_value_errors([value_error()], type_map()) ->
         [value_error()].

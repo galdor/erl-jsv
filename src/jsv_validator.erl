@@ -20,7 +20,7 @@
 -export_type([state/0]).
 
 -opaque state() :: #{value := json:value(),
-                     value_path := json_pointer:pointer(),
+                     pointer := json_pointer:pointer(),
                      definition := jsv:definition(),
                      type_map := jsv:type_map(),
                      errors := [jsv:value_error()]}.
@@ -29,7 +29,7 @@
 init(Value, Definition, Options) ->
   TypeMap = maps:get(type_map, Options, jsv:default_type_map()),
   #{value => Value,
-    value_path => [],
+    pointer => [],
     definition => Definition,
     type_map => TypeMap,
     errors => []}.
@@ -59,16 +59,16 @@ validate(State = #{value := Value,
                      json_pointer:reference_token() | undefined,
                      jsv_validator:state()) -> state().
 validate_child(Value, Definition, ChildPath,
-               State = #{value_path := ValuePath}) ->
-  ValuePath2 = case ChildPath of
+               State = #{pointer := Pointer}) ->
+  Pointer2 = case ChildPath of
                  undefined -> ChildPath;
-                 RefToken -> json_pointer:child(ValuePath, RefToken)
+                 RefToken -> json_pointer:child(Pointer, RefToken)
                end,
   State2 = State#{value => Value,
-                  value_path => ValuePath2,
+                  pointer => Pointer2,
                   definition => Definition},
   State3 = validate(State2),
-  State3#{value_path => ValuePath}.
+  State3#{pointer => Pointer}.
 
 -spec add_value_error(jsv:value_error_reason(), state()) ->
         state().
@@ -82,5 +82,5 @@ add_constraint_violation(Constraint, Type, State = #{errors := Errors}) ->
   State#{errors => [Error | Errors]}.
 
 -spec value_error(state(), jsv:value_error_reason()) -> jsv:value_error().
-value_error(#{value := Value, value_path := ValuePath}, Reason) ->
-  #{reason => Reason, value => Value, value_path => ValuePath}.
+value_error(#{value := Value, pointer := Pointer}, Reason) ->
+  #{reason => Reason, value => Value, pointer => Pointer}.
