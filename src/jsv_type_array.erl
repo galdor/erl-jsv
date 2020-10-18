@@ -16,7 +16,7 @@
 
 -behaviour(jsv_type).
 
--export([name/0, verify_constraint/2, format_constraint_violation/2,
+-export([verify_constraint/2, format_constraint_violation/2,
          validate_type/1, validate_constraint/3]).
 
 -export_type([constraint/0]).
@@ -24,10 +24,6 @@
 -type constraint() :: {element_type, jsv:definition()}
                     | {min_length, number()}
                     | {max_length, number()}.
-
--spec name() -> jsv:type().
-name() ->
-  array.
 
 verify_constraint({element_type, Definition}, TypeMap) ->
   jsv:verify_definition(Definition, TypeMap);

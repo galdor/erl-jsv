@@ -14,8 +14,6 @@
 
 -module(jsv_type).
 
--callback name() -> jsv:type().
-
 -callback verify_constraint(jsv:constraint(), jsv:type_map()) ->
   ok | unknown | invalid | {invalid, term()} |
   {error, [jsv:definition_error()]}.

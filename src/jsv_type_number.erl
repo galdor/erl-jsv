@@ -16,16 +16,13 @@
 
 -behaviour(jsv_type).
 
--export([name/0, verify_constraint/2, format_constraint_violation/2,
+-export([verify_constraint/2, format_constraint_violation/2,
          validate_type/1, validate_constraint/3]).
 
 -export_type([constraint/0]).
 
 -type constraint() :: {min, number()}
                     | {max, number()}.
-
-name() ->
-  number.
 
 verify_constraint({min, Min}, _) when is_number(Min) ->
   ok;
