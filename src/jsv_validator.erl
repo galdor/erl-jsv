@@ -15,7 +15,7 @@
 -module(jsv_validator).
 
 -export([init/3, errors/1, validate/1, validate_child/4,
-         add_error/2, add_constraint_violation/3]).
+         add_value_error/2, add_constraint_violation/2]).
 
 -export_type([state/0]).
 
@@ -23,7 +23,7 @@
                      value_path := json_pointer:pointer(),
                      definition := jsv:definition(),
                      type_map := jsv:type_map(),
-                     errors := [jsv:error()]}.
+                     errors := [jsv:value_error()]}.
 
 -spec init(json:value(), jsv:definition(), jsv:options()) -> state().
 init(Value, Definition, Options) ->
@@ -34,7 +34,7 @@ init(Value, Definition, Options) ->
     type_map => TypeMap,
     errors => []}.
 
--spec errors(state()) -> [jsv:error()].
+-spec errors(state()) -> [jsv:value_error()].
 errors(#{errors := Errors}) ->
   Errors.
 
@@ -44,19 +44,15 @@ validate(State = #{definition := Definition}) when is_atom(Definition) ->
 validate(State = #{value := Value,
                    definition := {Type, Constraints},
                    type_map := TypeMap}) ->
-  case maps:find(Type, TypeMap) of
-    {ok, Module} ->
-      case Module:validate_type(Value) of
-        ok ->
-          maps:fold(fun (ConstraintName, ConstraintValue, State2) ->
-                        Constraint = {ConstraintName, ConstraintValue},
-                        Module:validate_constraint(Value, Constraint, State2)
-                    end, State, Constraints);
-        error ->
-          add_error({invalid_value_type, Value, Type}, State)
-      end;
+  Module = maps:get(Type, TypeMap),
+  case Module:validate_type(Value) of
+    ok ->
+      maps:fold(fun (ConstraintName, ConstraintValue, State2) ->
+                    Constraint = {ConstraintName, ConstraintValue},
+                    Module:validate_constraint(Value, Constraint, State2)
+                end, State, Constraints);
     error ->
-      add_error({unknown_type, Type}, State)
+      add_value_error({invalid_type, Type}, State)
   end.
 
 -spec validate_child(json:value(), jsv:definition(),
@@ -74,19 +70,17 @@ validate_child(Value, Definition, ChildPath,
   State3 = validate(State2),
   State3#{value_path => ValuePath}.
 
--spec add_error(jsv:error_reason(), state()) -> state().
-add_error(Reason, State = #{errors := Errors}) ->
-  Error = validation_error(State, Reason),
-  State#{errors => [Error | Errors]}.
-
--spec add_constraint_violation(json:value(), jsv:constraint(), state()) ->
+-spec add_value_error(jsv:value_error_reason(), state()) ->
         state().
-add_constraint_violation(Value, Constraint, State = #{errors := Errors}) ->
-  Error = validation_error(State, {constraint_violation, Value, Constraint}),
+add_value_error(Reason, State = #{errors := Errors}) ->
+  State#{errors => [value_error(State, Reason) | Errors]}.
+
+-spec add_constraint_violation(jsv:constraint(), state()) ->
+        state().
+add_constraint_violation(Constraint, State = #{errors := Errors}) ->
+  Error = value_error(State, {constraint_violation, Constraint}),
   State#{errors => [Error | Errors]}.
 
--spec validation_error(state(), jsv:error_reason()) -> jsv:error().
-validation_error(#{value_path := ValuePath},
-                 Reason) ->
-  #{reason => Reason,
-    value_path => ValuePath}.
+-spec value_error(state(), jsv:value_error_reason()) -> jsv:value_error().
+value_error(#{value := Value, value_path := ValuePath}, Reason) ->
+  #{reason => Reason, value => Value, value_path => ValuePath}.

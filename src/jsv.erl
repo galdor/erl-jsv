@@ -14,14 +14,17 @@
 
 -module(jsv).
 
--export([default_type_map/0, validate/2, validate/3]).
+-export([default_type_map/0,
+         validate/2, validate/3,
+         verify_definition/2]).
 
 -export_type([definition/0,
               type/0, type_map/0,
               constraints/0, constraint/0,
               constraint_name/0, constraint_value/0,
               options/0,
-              error/0, error_reason/0]).
+              definition_error/0,
+              value_error/0, value_error_reason/0]).
 
 -type definition() :: type() | {type(), constraints()}.
 
@@ -35,21 +38,24 @@
 
 -type options() :: #{type_map => type_map()}.
 
--type error() :: #{reason := error_reason(),
-                   value_path := json_pointer:pointer()}.
--type error_reason() :: {unknown_type, jsv:type()}
-                      | {invalid_value_type, json:value(),
-                         ExpectedType :: jsv:type()}
-                      | {unknown_constraint, constraint()}
-                      | {invalid_constraint, constraint()}
-                      | {constraint_violation, json:value(), constraint()}.
+-type definition_error() :: {invalid_format, term()}
+                          | {unknown_type, type()}
+                          | {unknown_constraint, jsv:type(), jsv:constraint()}
+                          | {invalid_constraint, jsv:type(),
+                             jsv:constraint(), term()}.
 
--spec validate(json:value(), definition()) -> ok | {error, [error()]}.
+-type value_error() :: #{reason := value_error_reason(),
+                         value := json:value(),
+                         value_path := json_pointer:pointer()}.
+-type value_error_reason() :: {invalid_type, ExpectedType :: jsv:type()}
+                            | {constraint_violation, constraint()}.
+
+-spec validate(json:value(), definition()) -> ok | {error, [value_error()]}.
 validate(Value, Definition) ->
   validate(Value, Definition, #{}).
 
 -spec validate(json:value(), definition(), options()) ->
-        ok | {error, [error()]}.
+        ok | {error, [value_error()]}.
 validate(Value, Definition, Options) ->
   State = jsv_validator:init(Value, Definition, Options),
   State2 = jsv_validator:validate(State),
@@ -57,8 +63,45 @@ validate(Value, Definition, Options) ->
     [] ->
       ok;
     Errors ->
-      {error, Errors}
+      {error, lists:reverse(Errors)}
   end.
+
+-spec verify_definition(definition(), type_map()) ->
+        ok | {error, [definition_error()]}.
+verify_definition(Definition, TypeMap) when is_atom(Definition) ->
+  verify_definition({Definition, #{}}, TypeMap);
+verify_definition({TypeName, Constraints}, TypeMap) ->
+  case maps:find(TypeName, TypeMap) of
+    {ok, Module} ->
+      F = fun (ConstraintName, ConstraintValue, Errors) ->
+              Constraint = {ConstraintName, ConstraintValue},
+              case Module:verify_constraint(Constraint, TypeMap) of
+                ok ->
+                  Errors;
+                unknown ->
+                  [{unknown_constraint, TypeName, Constraint} | Errors];
+                invalid ->
+                  Error = {invalid_constraint, TypeName, Constraint,
+                           invalid_value},
+                  [Error | Errors];
+                {invalid, Reason} ->
+                  Error = {invalid_constraint, TypeName, Constraint, Reason},
+                  [Error | Errors];
+                {error, ValidationErrors} ->
+                  ValidationErrors ++ Errors
+              end
+          end,
+      case maps:fold(F, [], Constraints) of
+        [] ->
+          ok;
+        Errors ->
+          {error, Errors}
+      end;
+    error ->
+      {error, [{unknown_type, TypeName}]}
+  end;
+verify_definition(Definition, _) ->
+  {error, [{invalid_format, Definition}]}.
 
 -spec default_type_map() -> type_map().
 default_type_map() ->

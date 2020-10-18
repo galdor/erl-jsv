@@ -16,6 +16,10 @@
 
 -callback name() -> jsv:type().
 
+-callback verify_constraint(jsv:constraint(), jsv:type_map()) ->
+  ok | unknown | invalid | {invalid, term()} |
+  {error, [jsv:definition_error()]}.
+
 -callback validate_type(json:value()) -> ok | error.
 
 -callback validate_constraint(json:value(), jsv:constraint(),

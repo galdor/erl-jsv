@@ -16,9 +16,11 @@
 
 -behaviour(jsv_type).
 
--export([name/0, validate_type/1, validate_constraint/3]).
+-export([name/0, verify_constraint/2, validate_type/1, validate_constraint/3]).
 
--type constraint() :: {element_type, jsv:type()}
+-export_type([constraint/0]).
+
+-type constraint() :: {element_type, jsv:definition()}
                     | {min_length, number()}
                     | {max_length, number()}.
 
@@ -26,14 +28,23 @@
 name() ->
   array.
 
--spec validate_type(list()) -> ok | error.
+verify_constraint({element_type, Definition}, TypeMap) ->
+  jsv:verify_definition(Definition, TypeMap);
+verify_constraint({min_length, Value}, _) when is_number(Value) ->
+  ok;
+verify_constraint({min_length, _}, _) ->
+  invalid;
+verify_constraint({max_length, Value}, _) when is_number(Value) ->
+  ok;
+verify_constraint({max_length, _}, _) ->
+  invalid;
+verify_constraint(_, _) ->
+  unknown.
+
 validate_type(Value) when is_list(Value) ->
   ok;
 validate_type(_) ->
   error.
-
--spec validate_constraint(list(), constraint(), jsv_validator:state()) ->
-        jsv_validator:state().
 
 validate_constraint(Value, {element_type, ElementType}, State) ->
   F = fun (I, Element, State2) ->
@@ -48,10 +59,8 @@ validate_constraint(Value, Constraint = {min_length, Min}, State) when
     true ->
       State;
     false ->
-      jsv_validator:add_constraint_violation(Value, Constraint, State)
+      jsv_validator:add_constraint_violation(Constraint, State)
   end;
-validate_constraint(_, Constraint = {min_length, _}, State) ->
-  jsv_validator:add_error({invalid_constraint, Constraint}, State);
 
 validate_constraint(Value, Constraint = {max_length, Max}, State) when
     is_number(Max) ->
@@ -59,10 +68,5 @@ validate_constraint(Value, Constraint = {max_length, Max}, State) when
     true ->
       State;
     false ->
-      jsv_validator:add_constraint_violation(Value, Constraint, State)
-  end;
-validate_constraint(_, Constraint = {max_length, _}, State) ->
-  jsv_validator:add_error({invalid_constraint, Constraint}, State);
-
-validate_constraint(_, Constraint, State) ->
-  jsv_validator:add_error({invalid_constraint, Constraint}, State).
+      jsv_validator:add_constraint_violation(Constraint, State)
+  end.
