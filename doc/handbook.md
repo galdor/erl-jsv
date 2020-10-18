@@ -31,6 +31,13 @@ fundamental operations:
 - Validating value types.
 - Validating values against constraints.
 
+Types are organized in type maps which associate the atom representing the
+type to the module implementing the type.
+
+The default type map, returned by `jsd:default_type_map/0`, contains a set of
+default types useful for various kinds of JSON data. Users are free to extend
+it or replace it altogether.
+
 ## Default types
 ### null
 Represents a `null` JSON constant. This type does not support any constraint.
