@@ -46,17 +46,8 @@ validate_type(Value) when is_integer(Value) ->
 validate_type(_) ->
   error.
 
-validate_constraint(Value, Constraint = {min, Min}, State) ->
-  case Value >= Min of
-    true ->
-      State;
-    false ->
-      jsv_validator:add_constraint_violation(Constraint, integer, State)
-  end;
-validate_constraint(Value, Constraint = {max, Max}, State) ->
-  case Value =< Max of
-    true ->
-      State;
-    false ->
-      jsv_validator:add_constraint_violation(Constraint, integer, State)
-  end.
+validate_constraint(Value, {min, Min}, _) ->
+  Value >= Min;
+
+validate_constraint(Value, {max, Max}, _) ->
+  Value =< Max.

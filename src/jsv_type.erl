@@ -29,4 +29,4 @@
 
 -callback validate_constraint(json:value(), jsv:constraint(),
                               jsv_validator:state()) ->
-  jsv_validator:state().
+  ok | invalid | {invalid, term()} | boolean() | [jsv:definition_error()].

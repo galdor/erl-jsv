@@ -34,8 +34,5 @@ format_constraint_violation({value, ExpectedValue}, _) ->
 validate_type(_) ->
   ok.
 
-validate_constraint(Value, {value, ExpectedValue}, State) when
-    Value == ExpectedValue ->
-  State;
-validate_constraint(_, Constraint = {value, _}, State) ->
-  jsv_validator:add_constraint_violation(Constraint, any, State).
+validate_constraint(Value, {value, ExpectedValue}, _) ->
+  Value == ExpectedValue.

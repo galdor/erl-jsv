@@ -92,29 +92,26 @@ validate_type(_) ->
   error.
 
 validate_constraint(Value, {value_type, ValueType}, State) ->
-  F = fun (MemberName, MemberValue, State2) ->
-          jsv_validator:validate_child(MemberValue, ValueType,
-                                       MemberName, State2)
+  F = fun (MemberName, MemberValue, Errors) ->
+          case
+            jsv_validator:validate_child(MemberValue, ValueType, MemberName,
+                                         State)
+          of
+            ok ->
+              Errors;
+            {error, Errors2} ->
+              Errors2 ++ Errors
+          end
       end,
-  maps:fold(F, State, Value);
+  maps:fold(F, [], Value);
 
-validate_constraint(Value, Constraint = {min_size, Min}, State) ->
-  case map_size(Value) >= Min of
-    true ->
-      State;
-    false ->
-      jsv_validator:add_constraint_violation(Constraint, object, State)
-  end;
+validate_constraint(Value, {min_size, Min}, _) ->
+  map_size(Value) >= Min;
 
-validate_constraint(Value, Constraint = {max_size, Max}, State) ->
-  case map_size(Value) =< Max of
-    true ->
-      State;
-    false ->
-      jsv_validator:add_constraint_violation(Constraint, object, State)
-  end;
+validate_constraint(Value, {max_size, Max}, _) ->
+  map_size(Value) =< Max;
 
-validate_constraint(Value, Constraint = {required, Names}, State) ->
+validate_constraint(Value, {required, Names}, _) ->
   F = fun (Name, MissingNames) ->
           case maps:is_key(Name, Value) of
             true ->
@@ -125,22 +122,24 @@ validate_constraint(Value, Constraint = {required, Names}, State) ->
       end,
   case lists:foldl(F, [], Names) of
     [] ->
-      State;
+      ok;
     MissingNames ->
-      MissingNames2 = lists:reverse(MissingNames),
-      jsv_validator:add_constraint_violation(Constraint, object,
-                                             {missing_names, MissingNames2},
-                                             State)
+      {invalid, lists:reverse(MissingNames)}
   end;
 
 validate_constraint(Value, {members, Definitions}, State) ->
-  F = fun (MemberName, Definition, State2) ->
+  F = fun (MemberName, Definition, Errors) ->
           case maps:find(MemberName, Value) of
             {ok, MemberValue} ->
-              jsv_validator:validate_child(MemberValue, Definition,
-                                           MemberName, State2);
-            error ->
-              State2
+              case
+                jsv_validator:validate_child(MemberValue, Definition,
+                                             MemberName, State)
+              of
+                ok ->
+                  Errors;
+                {error, Errors2} ->
+                  Errors2 ++ Errors
+              end
           end
       end,
-  maps:fold(F, State, Definitions).
+  maps:fold(F, [], Definitions).

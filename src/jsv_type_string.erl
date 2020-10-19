@@ -66,42 +66,32 @@ validate_type(Value) when is_binary(Value) ->
 validate_type(_) ->
   error.
 
-validate_constraint(Value, Constraint = {min_length, Min}, State) ->
-  case string_length(Value) >= Min of
-    true ->
-      State;
-    false ->
-      jsv_validator:add_constraint_violation(Constraint, string, State)
-  end;
+validate_constraint(Value, {min_length, Min}, _) ->
+  string_length(Value) >= Min;
 
-validate_constraint(Value, Constraint = {max_length, Max}, State) ->
-  case string_length(Value) =< Max of
-    true ->
-      State;
-    false ->
-      jsv_validator:add_constraint_violation(Constraint, string, State)
-  end;
+validate_constraint(Value, {max_length, Max}, _) ->
+  string_length(Value) =< Max;
 
-validate_constraint(Value, Constraint = {prefix, Prefix}, State) when
+validate_constraint(Value, {prefix, Prefix}, _) when
     byte_size(Value) < byte_size(Prefix) ->
-  jsv_validator:add_constraint_violation(Constraint, string, State);
-validate_constraint(Value, Constraint = {prefix, Prefix}, State) ->
+  invalid;
+validate_constraint(Value, {prefix, Prefix}, _) ->
   case binary_part(Value, {0, byte_size(Prefix)}) of
     Prefix ->
-      State;
+      ok;
     _ ->
-      jsv_validator:add_constraint_violation(Constraint, string, State)
+      invalid
   end;
 
-validate_constraint(Value, Constraint = {suffix, Suffix}, State) when
+validate_constraint(Value, {suffix, Suffix}, _) when
     byte_size(Value) < byte_size(Suffix) ->
-  jsv_validator:add_constraint_violation(Constraint, string, State);
-validate_constraint(Value, Constraint = {suffix, Suffix}, State) ->
+  invalid;
+validate_constraint(Value, {suffix, Suffix}, _) ->
   case binary_part(Value, {byte_size(Value), -byte_size(Suffix)}) of
     Suffix ->
-      State;
+      ok;
     _ ->
-      jsv_validator:add_constraint_violation(Constraint, string, State)
+      invalid
   end.
 
 -spec string_length(binary()) -> non_neg_integer().

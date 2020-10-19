@@ -50,24 +50,21 @@ validate_type(_) ->
   error.
 
 validate_constraint(Value, {element_type, ElementType}, State) ->
-  F = fun (I, Element, State2) ->
-          jsv_validator:validate_child(Element, ElementType,
-                                       integer_to_binary(I), State2)
+  F = fun (I, Element, Errors) ->
+          case
+            jsv_validator:validate_child(Element, ElementType,
+                                         integer_to_binary(I), State)
+          of
+            ok ->
+              Errors;
+            {error, Errors2} ->
+              Errors2 ++ Errors
+          end
       end,
-  jsv_utils:fold_list_with_index(F, State, Value);
-validate_constraint(Value, Constraint = {min_length, Min}, State) when
-    is_number(Min) ->
-  case length(Value) >= Min of
-    true ->
-      State;
-    false ->
-      jsv_validator:add_constraint_violation(Constraint, array, State)
-  end;
-validate_constraint(Value, Constraint = {max_length, Max}, State) when
-    is_number(Max) ->
-  case length(Value) =< Max of
-    true ->
-      State;
-    false ->
-      jsv_validator:add_constraint_violation(Constraint, array, State)
-  end.
+  jsv_utils:fold_list_with_index(F, [], Value);
+
+validate_constraint(Value, {min_length, Min}, _) ->
+  length(Value) >= Min;
+
+validate_constraint(Value, {max_length, Max}, _) ->
+  length(Value) =< Max.

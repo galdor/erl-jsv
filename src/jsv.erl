@@ -80,11 +80,10 @@ validate(Value, Definition, Options) ->
       end
   end,
   State = jsv_validator:init(Value, Definition, Options),
-  State2 = jsv_validator:validate(State),
-  case jsv_validator:errors(State2) of
-    [] ->
+  case jsv_validator:validate(State) of
+    ok ->
       ok;
-    Errors ->
+    {error, Errors} ->
       Errors2 = lists:reverse(Errors),
       Errors3 = case maps:get(format_value_errors, Options, false) of
                   true ->
