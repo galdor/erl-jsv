@@ -141,14 +141,11 @@ verify_definition(Definition, _) ->
   {error, [{invalid_format, Definition}]}.
 
 -spec format_value_error(value_error(), type_map()) -> value_error().
-format_value_error(Error = #{reason := Reason,
-                             value := Value,
-                             pointer := Pointer},
+format_value_error(Error = #{reason := Reason, pointer := Pointer},
                    TypeMap) ->
   Msg = case Reason of
           {invalid_type, ExpectedType} ->
-            io_lib:format(<<"value ~0tp is not of type ~0tp">>,
-                          [Value, ExpectedType]);
+            io_lib:format(<<"value is not of type ~0tp">>, [ExpectedType]);
           {constraint_violation, Type, Constraint} ->
             Module = maps:get(Type, TypeMap),
             case Module:format_constraint_violation(Constraint, undefined) of
@@ -166,8 +163,7 @@ format_value_error(Error = #{reason := Reason,
                 unicode:characters_to_binary(Data)
             end;
           _ ->
-            io_lib:format(<<"invalid value ~0tp: ~0tp">>,
-                          [Value, Reason])
+            io_lib:format(<<"invalid value: ~0tp">>, [Reason])
         end,
   Error#{reason_string => iolist_to_binary(Msg),
          pointer_string => json_pointer:serialize(Pointer)}.
