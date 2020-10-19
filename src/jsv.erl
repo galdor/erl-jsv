@@ -25,7 +25,8 @@
               constraint_name/0, constraint_value/0,
               options/0,
               definition_error/0,
-              value_error/0, value_error_reason/0]).
+              value_error/0, value_error_reason/0,
+              constraint_violation_details/0]).
 
 -type definition() :: type() | {type(), constraints()}.
 
@@ -53,7 +54,11 @@
                          pointer := json_pointer:pointer(),
                          pointer_string => binary()}.
 -type value_error_reason() :: {invalid_type, ExpectedType :: jsv:type()}
-                            | {constraint_violation, jsv:type(), constraint()}.
+                            | {constraint_violation, jsv:type(), constraint()}
+                            | {constraint_violation, jsv:type(), constraint(),
+                               constraint_violation_details()}.
+
+-type constraint_violation_details() :: undefined | term().
 
 -spec validate(json:value(), definition()) -> ok | {error, [value_error()]}.
 validate(Value, Definition) ->
@@ -146,7 +151,15 @@ format_value_error(Error = #{reason := Reason,
                           [Value, ExpectedType]);
           {constraint_violation, Type, Constraint} ->
             Module = maps:get(Type, TypeMap),
-            case Module:format_constraint_violation(Constraint) of
+            case Module:format_constraint_violation(Constraint, undefined) of
+              {Format, Args} ->
+                iolist_to_binary(io_lib:format(Format, Args));
+              Data ->
+                unicode:characters_to_binary(Data)
+            end;
+          {constraint_violation, Type, Constraint, Details} ->
+            Module = maps:get(Type, TypeMap),
+            case Module:format_constraint_violation(Constraint, Details) of
               {Format, Args} ->
                 iolist_to_binary(io_lib:format(Format, Args));
               Data ->

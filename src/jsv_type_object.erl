@@ -16,7 +16,7 @@
 
 -behaviour(jsv_type).
 
--export([verify_constraint/2, format_constraint_violation/1,
+-export([verify_constraint/2, format_constraint_violation/2,
          validate_type/1, validate_constraint/3]).
 
 -export_type([constraint/0]).
@@ -24,7 +24,7 @@
 -type constraint() :: {value_type, jsv:definition()}
                     | {min_size, non_neg_integer()}
                     | {max_size, non_neg_integer()}
-                    | {required, [binary()]}.
+                    | {required, Names :: [binary()]}.
 
 verify_constraint({value_type, Definition}, TypeMap) ->
   jsv:verify_definition(Definition, TypeMap);
@@ -39,8 +39,8 @@ verify_constraint({max_size, Max}, _) when is_integer(Max), Max >= 0 ->
 verify_constraint({max_size, _}, _) ->
   invalid;
 
-verify_constraint({required, Required}, _) when is_list(Required) ->
-  case lists:all(fun is_binary/1, Required) of
+verify_constraint({required, Names}, _) when is_list(Names) ->
+  case lists:all(fun is_binary/1, Names) of
     true ->
       ok;
     false ->
@@ -52,15 +52,15 @@ verify_constraint({required, _}, _) ->
 verify_constraint(_, _) ->
   unknown.
 
-format_constraint_violation({min_size, Min}) ->
+format_constraint_violation({min_size, Min}, _) ->
   {"value must contain at least ~0tp members", [Min]};
 
-format_constraint_violation({max_size, Max}) ->
+format_constraint_violation({max_size, Max}, _) ->
   {"value must contain at most ~0tp members", [Max]};
 
-format_constraint_violation({required, [Name]}) ->
+format_constraint_violation({required, _}, {missing_names, [Name]}) ->
   {"value must contain the following member: ~ts", [Name]};
-format_constraint_violation({required, Names}) ->
+format_constraint_violation({required, _}, {missing_names, Names}) ->
   Data = lists:join(<<", ">>, Names),
   {"value must contain the following members: ~ts", [iolist_to_binary(Data)]}.
 
@@ -92,11 +92,21 @@ validate_constraint(Value, Constraint = {max_size, Max}, State) ->
       jsv_validator:add_constraint_violation(Constraint, object, State)
   end;
 
-validate_constraint(Value, Constraint = {required, Required}, State) ->
-  IsContained = fun (Name) -> maps:is_key(Name, Value) end,
-  case lists:all(IsContained, Required) of
-    true ->
+validate_constraint(Value, Constraint = {required, Names}, State) ->
+  F = fun (Name, MissingNames) ->
+          case maps:is_key(Name, Value) of
+            true ->
+              MissingNames;
+            false ->
+              [Name | MissingNames]
+          end
+      end,
+  case lists:foldl(F, [], Names) of
+    [] ->
       State;
-    false ->
-      jsv_validator:add_constraint_violation(Constraint, object, State)
+    MissingNames ->
+      MissingNames2 = lists:reverse(MissingNames),
+      jsv_validator:add_constraint_violation(Constraint, object,
+                                             {missing_names, MissingNames2},
+                                             State)
   end.

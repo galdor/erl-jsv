@@ -14,14 +14,15 @@
 
 -module(jsv_type).
 
--optional_callbacks([verify_constraint/2, format_constraint_violation/1,
+-optional_callbacks([verify_constraint/2, format_constraint_violation/2,
                      validate_constraint/3]).
 
 -callback verify_constraint(jsv:constraint(), jsv:type_map()) ->
   ok | unknown | invalid | {invalid, term()} |
   {error, [jsv:definition_error()]}.
 
--callback format_constraint_violation(jsv:constraint()) ->
+-callback format_constraint_violation(jsv:constraint(),
+                                      jsv:constraint_violation_details()) ->
   unicode:chardata() | {io:format(), [term()]}.
 
 -callback validate_type(json:value()) -> ok | error.

@@ -15,7 +15,8 @@
 -module(jsv_validator).
 
 -export([init/3, errors/1, validate/1, validate_child/4,
-         add_value_error/2, add_constraint_violation/3]).
+         add_value_error/2, add_constraint_violation/3,
+         add_constraint_violation/4]).
 
 -export_type([state/0]).
 
@@ -79,6 +80,13 @@ add_value_error(Reason, State = #{errors := Errors}) ->
         state().
 add_constraint_violation(Constraint, Type, State = #{errors := Errors}) ->
   Error = value_error(State, {constraint_violation, Type, Constraint}),
+  State#{errors => [Error | Errors]}.
+
+-spec add_constraint_violation(jsv:constraint(), jsv:type(), term(), state()) ->
+        state().
+add_constraint_violation(Constraint, Type, Details,
+                         State = #{errors := Errors}) ->
+  Error = value_error(State, {constraint_violation, Type, Constraint, Details}),
   State#{errors => [Error | Errors]}.
 
 -spec value_error(state(), jsv:value_error_reason()) -> jsv:value_error().

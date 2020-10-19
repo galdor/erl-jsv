@@ -16,7 +16,7 @@
 
 -behaviour(jsv_type).
 
--export([verify_constraint/2, format_constraint_violation/1,
+-export([verify_constraint/2, format_constraint_violation/2,
          validate_type/1, validate_constraint/3]).
 
 -export_type([constraint/0]).
@@ -49,13 +49,16 @@ verify_constraint({suffix, _}, _) ->
 verify_constraint(_, _) ->
   unknown.
 
-format_constraint_violation({min_length, Min}) ->
+format_constraint_violation({min_length, Min}, _) ->
   {"value must contain at least ~0tp characters", [Min]};
-format_constraint_violation({max_length, Max}) ->
+
+format_constraint_violation({max_length, Max}, _) ->
   {"value must contain at most ~0tp characters", [Max]};
-format_constraint_violation({prefix, Prefix}) ->
+
+format_constraint_violation({prefix, Prefix}, _) ->
   {"value must start with \"~ts\"", [Prefix]};
-format_constraint_violation({suffix, Suffix}) ->
+
+format_constraint_violation({suffix, Suffix}, _) ->
   {"value must end with \"~ts\"", [Suffix]}.
 
 validate_type(Value) when is_binary(Value) ->
