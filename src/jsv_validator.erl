@@ -87,7 +87,8 @@ validate_child(Value, Definition, ChildPath,
 constraint_violation(State, Type, Constraint) ->
   value_error(State, {constraint_violation, Type, Constraint}).
 
--spec constraint_violation(state(), jsv:type(), jsv:constraint(), Details :: term()) ->
+-spec constraint_violation(state(), jsv:type(), jsv:constraint(),
+                           Details :: term()) ->
         jsv:value_error().
 constraint_violation(State, Type, Constraint, Details) ->
   value_error(State, {constraint_violation, Type, Constraint, Details}).
