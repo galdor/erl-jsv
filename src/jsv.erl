@@ -98,7 +98,8 @@ validate(Value, Definition, Options) ->
         ok | {error, [definition_error()]}.
 verify_definition(Definition, TypeMap) when is_atom(Definition) ->
   verify_definition({Definition, #{}}, TypeMap);
-verify_definition({TypeName, Constraints}, TypeMap) ->
+verify_definition({TypeName, Constraints}, TypeMap) when
+    is_atom(TypeName), is_map(Constraints) ->
   case maps:find(TypeName, TypeMap) of
     {ok, Module} ->
       Exported = lists:member({verify_constraint, 2},
