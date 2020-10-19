@@ -141,7 +141,9 @@ validate_constraint(Value, {members, Definitions}, State) ->
                   Errors;
                 {error, Errors2} ->
                   Errors2 ++ Errors
-              end
+              end;
+            error ->
+              Errors
           end
       end,
   maps:fold(F, [], Definitions).
