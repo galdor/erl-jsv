@@ -70,6 +70,8 @@ verify_constraint({members, Definitions}, TypeMap) when is_map(Definitions) ->
     false ->
       invalid
   end;
+verify_constraint({members, _}, _) ->
+  invalid;
 
 verify_constraint(_, _) ->
   unknown.
