@@ -50,12 +50,12 @@ validate_constraint(Value, Constraint = {min, Min}, State) ->
     true ->
       State;
     false ->
-      jsv_validator:add_constraint_violation(Constraint, number, State)
+      jsv_validator:add_constraint_violation(Constraint, integer, State)
   end;
 validate_constraint(Value, Constraint = {max, Max}, State) ->
   case Value =< Max of
     true ->
       State;
     false ->
-      jsv_validator:add_constraint_violation(Constraint, number, State)
+      jsv_validator:add_constraint_violation(Constraint, integer, State)
   end.

@@ -60,7 +60,7 @@ validate_constraint(Value, Constraint = {min_size, Min}, State) when
     true ->
       State;
     false ->
-      jsv_validator:add_constraint_violation(Constraint, array, State)
+      jsv_validator:add_constraint_violation(Constraint, object, State)
   end;
 validate_constraint(Value, Constraint = {max_size, Max}, State) when
     is_number(Max) ->
@@ -68,5 +68,5 @@ validate_constraint(Value, Constraint = {max_size, Max}, State) when
     true ->
       State;
     false ->
-      jsv_validator:add_constraint_violation(Constraint, array, State)
+      jsv_validator:add_constraint_violation(Constraint, object, State)
   end.
