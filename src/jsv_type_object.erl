@@ -23,25 +23,46 @@
 
 -type constraint() :: {value_type, jsv:definition()}
                     | {min_size, non_neg_integer()}
-                    | {max_size, non_neg_integer()}.
+                    | {max_size, non_neg_integer()}
+                    | {required, [binary()]}.
 
 verify_constraint({value_type, Definition}, TypeMap) ->
   jsv:verify_definition(Definition, TypeMap);
+
 verify_constraint({min_size, Min}, _) when is_integer(Min), Min >= 0 ->
   ok;
 verify_constraint({min_size, _}, _) ->
   invalid;
+
 verify_constraint({max_size, Max}, _) when is_integer(Max), Max >= 0 ->
   ok;
 verify_constraint({max_size, _}, _) ->
   invalid;
+
+verify_constraint({required, Required}, _) when is_list(Required) ->
+  case lists:all(fun is_binary/1, Required) of
+    true ->
+      ok;
+    false ->
+      invalid
+  end;
+verify_constraint({required, _}, _) ->
+  invalid;
+
 verify_constraint(_, _) ->
   unknown.
 
 format_constraint_violation({min_size, Min}) ->
   {"value must contain at least ~0tp members", [Min]};
+
 format_constraint_violation({max_size, Max}) ->
-  {"value must contain at most ~0tp members", [Max]}.
+  {"value must contain at most ~0tp members", [Max]};
+
+format_constraint_violation({required, [Name]}) ->
+  {"value must contain the following member: ~ts", [Name]};
+format_constraint_violation({required, Names}) ->
+  Data = lists:join(<<", ">>, Names),
+  {"value must contain the following members: ~ts", [iolist_to_binary(Data)]}.
 
 validate_type(Value) when is_map(Value) ->
   ok;
@@ -54,17 +75,26 @@ validate_constraint(Value, {value_type, ValueType}, State) ->
                                        MemberName, State2)
       end,
   maps:fold(F, State, Value);
-validate_constraint(Value, Constraint = {min_size, Min}, State) when
-    is_number(Min) ->
+
+validate_constraint(Value, Constraint = {min_size, Min}, State) ->
   case map_size(Value) >= Min of
     true ->
       State;
     false ->
       jsv_validator:add_constraint_violation(Constraint, object, State)
   end;
-validate_constraint(Value, Constraint = {max_size, Max}, State) when
-    is_number(Max) ->
+
+validate_constraint(Value, Constraint = {max_size, Max}, State) ->
   case map_size(Value) =< Max of
+    true ->
+      State;
+    false ->
+      jsv_validator:add_constraint_violation(Constraint, object, State)
+  end;
+
+validate_constraint(Value, Constraint = {required, Required}, State) ->
+  IsContained = fun (Name) -> maps:is_key(Name, Value) end,
+  case lists:all(IsContained, Required) of
     true ->
       State;
     false ->

@@ -100,6 +100,7 @@ Constraints:
 - `value_type`: the definition that must apply to all member values.
 - `min_size`: the minimal number of members in the object.
 - `max_size`: the maximum number of members in the object.
+- `required`: a list of member names the object must contain.
 
 ## Writing new types
 **TODO**
