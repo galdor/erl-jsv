@@ -24,7 +24,8 @@
 -type constraint() :: {value_type, jsv:definition()}
                     | {min_size, non_neg_integer()}
                     | {max_size, non_neg_integer()}
-                    | {required, Names :: [binary()]}.
+                    | {required, Names :: [binary()]}
+                    | {members, #{binary() := jsv:definition()}}.
 
 verify_constraint({value_type, Definition}, TypeMap) ->
   jsv:verify_definition(Definition, TypeMap);
@@ -48,6 +49,27 @@ verify_constraint({required, Names}, _) when is_list(Names) ->
   end;
 verify_constraint({required, _}, _) ->
   invalid;
+
+verify_constraint({members, Definitions}, TypeMap) when is_map(Definitions) ->
+  case lists:all(fun is_binary/1, maps:keys(Definitions)) of
+    true ->
+      F = fun (_, Definition, Errors) ->
+              case jsv:verify_definition(Definition, TypeMap) of
+                ok ->
+                  Errors;
+                {error, Errors2} ->
+                  Errors2 ++ Errors
+              end
+          end,
+      case maps:fold(F, [], Definitions) of
+        [] ->
+          ok;
+        Errors ->
+          {error, Errors}
+      end;
+    false ->
+      invalid
+  end;
 
 verify_constraint(_, _) ->
   unknown.
@@ -109,4 +131,16 @@ validate_constraint(Value, Constraint = {required, Names}, State) ->
       jsv_validator:add_constraint_violation(Constraint, object,
                                              {missing_names, MissingNames2},
                                              State)
-  end.
+  end;
+
+validate_constraint(Value, {members, Definitions}, State) ->
+  F = fun (MemberName, Definition, State2) ->
+          case maps:find(MemberName, Value) of
+            {ok, MemberValue} ->
+              jsv_validator:validate_child(MemberValue, Definition,
+                                           MemberName, State2);
+            error ->
+              State2
+          end
+      end,
+  maps:fold(F, State, Definitions).

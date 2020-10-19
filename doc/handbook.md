@@ -101,6 +101,8 @@ Constraints:
 - `min_size`: the minimal number of members in the object.
 - `max_size`: the maximum number of members in the object.
 - `required`: a list of member names the object must contain.
+- `members`: a map associating member name to definition; member values must
+  match the associated definitions if they are present in the value.
 
 ## Writing new types
 **TODO**
