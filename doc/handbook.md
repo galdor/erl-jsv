@@ -108,13 +108,19 @@ Constraints:
 Represents a [UUID](https://tools.ietf.org/html/rfc4122) string. This type
 does not support any constraint.
 
+Example: `"21fba787-4471-422d-bc94-63521e1181da"`.
+
 ### uri
 Represents a [URI](https://tools.ietf.org/html/rfc3986) string. This type
 does not support any constraint.
 
+Example: `"http://example.com/foo/bar?a=1"`.
+
 ### time
 Represents a partial time (or time of day) as defined in [RFC
 3339](https://tools.ietf.org/html/rfc3339), without any fractional seconds.
+
+Example: `"14:45:00"`.
 
 Constraints:
 
@@ -125,6 +131,8 @@ Constraints:
 Represents a full date as defined in [RFC
 3339](https://tools.ietf.org/html/rfc3339).
 
+Example: `"2010-08-01"`.
+
 Constraints:
 
 - `min`: the minimal date represented by the string.
@@ -133,6 +141,8 @@ Constraints:
 ### datetime
 Represents a full date and time string as defined in [RFC
 3339](https://tools.ietf.org/html/rfc3339).
+
+Example: `"2010-08-01T14:45:00+01:00"`.
 
 Note that due to limitations of the Erlang `calendar` module, fractional
 seconds in the input string are ignored.
