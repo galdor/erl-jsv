@@ -14,7 +14,7 @@
 
 {application, jsv,
  [{description, "Structural validation for JSON data."},
-  {vsn, "1.0.0"},
+  {vsn, "1.1.0"},
   {registered, []},
   {applications,
    [kernel,
