@@ -121,6 +121,15 @@ Constraints:
 - `min`: the minimal time of day represented by the string.
 - `max`: the maximal time of day represented by the string.
 
+### date
+Represents a full date as defined in [RFC
+3339](https://tools.ietf.org/html/rfc3339).
+
+Constraints:
+
+- `min`: the minimal date represented by the string.
+- `max`: the maximal date represented by the string.
+
 ## Writing new types
 **TODO**
 
