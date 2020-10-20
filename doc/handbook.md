@@ -112,6 +112,15 @@ does not support any constraint.
 Represents a [URI](https://tools.ietf.org/html/rfc3986) string. This type
 does not support any constraint.
 
+### time
+Represents a partial time (or time of day) as defined in [RFC
+3339](https://tools.ietf.org/html/rfc3339), without any fractional seconds.
+
+Constraints:
+
+- `min`: the minimal time of day represented by the string.
+- `max`: the maximal time of day represented by the string.
+
 ## Writing new types
 **TODO**
 
