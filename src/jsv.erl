@@ -183,4 +183,5 @@ default_type_map() ->
     string => jsv_type_string,
     array => jsv_type_array,
     object => jsv_type_object,
-    uuid => jsv_type_uuid}.
+    uuid => jsv_type_uuid,
+    uri => jsv_type_uri}.

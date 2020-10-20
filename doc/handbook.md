@@ -108,6 +108,10 @@ Constraints:
 Represents a [UUID](https://tools.ietf.org/html/rfc4122) string. This type
 does not support any constraint.
 
+### uri
+Represents a [URI](https://tools.ietf.org/html/rfc3986) string. This type
+does not support any constraint.
+
 ## Writing new types
 **TODO**
 

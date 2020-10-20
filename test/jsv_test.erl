@@ -183,6 +183,7 @@ validate_object_test_() ->
                                           {object, #{members =>
                                                        #{<<"a">> => integer,
                                                          <<"b">> => null}}}))].
+
 validate_uuid_test_() ->
   [?_assertEqual(ok, jsv:validate(<<"cab4cb80-4c66-4ed4-b248-7b52925130f1">>,
                                   uuid)),
@@ -196,3 +197,10 @@ validate_uuid_test_() ->
    ?_assertMatch({error, _},
                  jsv:validate(<<"cab4cb80-4c66-4ed4-b248-7b52925130f1-12">>,
                              uuid))].
+
+validate_uri_test_() ->
+  [?_assertEqual(ok, jsv:validate(<<"http://example.com">>, uri)),
+   ?_assertEqual(ok, jsv:validate(<<"/foo/bar">>, uri)),
+   ?_assertEqual(ok, jsv:validate(<<"//example.com?a=b#foo">>, uri)),
+   ?_assertMatch({error, _}, jsv:validate(<<":http">>, uri)),
+   ?_assertMatch({error, _}, jsv:validate(<<"">>, uri))].
