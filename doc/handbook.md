@@ -104,6 +104,10 @@ Constraints:
 - `members`: a map associating member name to definition; member values must
   match the associated definitions if they are present in the value.
 
+### uuid
+Represents a [UUID](https://tools.ietf.org/html/rfc4122) string. This type
+does not support any constraint.
+
 ## Writing new types
 **TODO**
 
