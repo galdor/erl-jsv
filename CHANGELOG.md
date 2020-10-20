@@ -8,6 +8,7 @@
   the `jsv_type:validate_constraint/3` instead of the original JSON value.
 - Add a type module for UUID strings.
 - Add a type modules for URI strings.
+- Add type modules for dates, times and datetimes.
 
 # 1.0.0
 First public version.

@@ -17,7 +17,8 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/3]).
+         validate_type/1, validate_constraint/3,
+         format_date/1, is_valid_date/1]).
 
 -export_type([constraint/0]).
 
@@ -88,6 +89,13 @@ parse_date(Value) ->
 -spec format_date(calendar:date()) -> binary().
 format_date({Y, M, D}) ->
   iolist_to_binary(io_lib:format(<<"~4..0b-~2..0b-~2..0b">>, [Y, M, D])).
+
+-spec is_valid_date(calendar:date()) -> boolean().
+is_valid_date({Y, M, D}) when
+    is_integer(Y), is_integer(M), is_integer(D) ->
+  calendar:valid_date(Y, M, D);
+is_valid_date(_) ->
+  false.
 
 -spec is_date_after(calendar:date(), calendar:date()) -> boolean().
 is_date_after(D1, D2) ->

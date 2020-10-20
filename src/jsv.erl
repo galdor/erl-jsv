@@ -186,4 +186,5 @@ default_type_map() ->
     uuid => jsv_type_uuid,
     uri => jsv_type_uri,
     time => jsv_type_time,
-    date => jsv_type_date}.
+    date => jsv_type_date,
+    datetime => jsv_type_datetime}.

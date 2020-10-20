@@ -130,6 +130,18 @@ Constraints:
 - `min`: the minimal date represented by the string.
 - `max`: the maximal date represented by the string.
 
+### datetime
+Represents a full date and time string as defined in [RFC
+3339](https://tools.ietf.org/html/rfc3339).
+
+Note that due to limitations of the Erlang `calendar` module, fractional
+seconds in the input string are ignored.
+
+Constraints:
+
+- `min`: the minimal datetime represented by the string.
+- `max`: the maximal datetime represented by the string.
+
 ## Writing new types
 **TODO**
 
