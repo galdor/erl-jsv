@@ -36,35 +36,43 @@ init(Value, Definition, Options) ->
 validate(State = #{definition := Definition}) when is_atom(Definition) ->
   validate(State#{definition => {Definition, #{}}});
 validate(State = #{value := Value,
-                   definition := {Type, Constraints},
+                   definition := {Type, _},
                    type_map := TypeMap}) ->
   Module = maps:get(Type, TypeMap),
   case Module:validate_type(Value) of
     ok ->
-      F = fun (ConstraintName, ConstraintValue, Errors) ->
-              Constraint = {ConstraintName, ConstraintValue},
-              case Module:validate_constraint(Value, Constraint, State) of
-                Result when Result =:= ok; Result =:= true ->
-                  Errors;
-                Result when Result =:= invalid; Result =:= false ->
-                  Error = constraint_violation(State, Type, Constraint),
-                  [Error | Errors];
-                {invalid, Details} ->
-                  Error = constraint_violation(State, Type, Constraint,
-                                               Details),
-                  [Error | Errors];
-                Errors2 when is_list(Errors2) ->
-                  Errors2 ++ Errors
-              end
-          end,
-      case maps:fold(F, [], Constraints) of
-        [] ->
-          ok;
-        Errors ->
-          {error, Errors}
-      end;
+      validate_constraints(Value, Module, State);
+    {ok, InterpretedValue} ->
+      validate_constraints(InterpretedValue, Module, State);
     error ->
       {error, [value_error(State, {invalid_type, Type})]}
+  end.
+
+-spec validate_constraints(json:value(), module(), state()) ->
+        ok | {error, [jsv:value_error()]}.
+validate_constraints(Value, Module,
+                     State = #{definition := {Type, Constraints}}) ->
+  F = fun (ConstraintName, ConstraintValue, Errors) ->
+          Constraint = {ConstraintName, ConstraintValue},
+          case Module:validate_constraint(Value, Constraint, State) of
+            Result when Result =:= ok; Result =:= true ->
+              Errors;
+            Result when Result =:= invalid; Result =:= false ->
+              Error = constraint_violation(State, Type, Constraint),
+              [Error | Errors];
+            {invalid, Details} ->
+              Error = constraint_violation(State, Type, Constraint,
+                                           Details),
+              [Error | Errors];
+            Errors2 when is_list(Errors2) ->
+              Errors2 ++ Errors
+          end
+      end,
+  case maps:fold(F, [], Constraints) of
+    [] ->
+      ok;
+    Errors ->
+      {error, Errors}
   end.
 
 -spec validate_child(json:value(), jsv:definition(),

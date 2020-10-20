@@ -25,8 +25,11 @@
                                       jsv:constraint_violation_details()) ->
   unicode:chardata() | {io:format(), [term()]}.
 
--callback validate_type(json:value()) -> ok | error.
+-callback validate_type(json:value()) ->
+  ok | {ok, InterpretedValue} | error when
+    InterpretedValue :: term().
 
--callback validate_constraint(json:value(), jsv:constraint(),
+-callback validate_constraint(json:value() | InterpretedValue, jsv:constraint(),
                               jsv_validator:state()) ->
-  ok | invalid | {invalid, term()} | boolean() | [jsv:definition_error()].
+  ok | invalid | {invalid, term()} | boolean() | [jsv:definition_error()] when
+    InterpretedValue :: term().
