@@ -24,7 +24,8 @@
 -type constraint() :: {min_length, non_neg_integer()}
                     | {max_length, non_neg_integer()}
                     | {prefix, binary()}
-                    | {suffix, binary()}.
+                    | {suffix, binary()}
+                    | {values, [jsv:keyword()]}.
 
 verify_constraint({min_length, Min}, _) when is_integer(Min), Min >= 0 ->
   ok;
@@ -46,6 +47,17 @@ verify_constraint({suffix, Suffix}, _) when is_binary(Suffix) ->
 verify_constraint({suffix, _}, _) ->
   invalid;
 
+verify_constraint({values, Values}, _) when
+    is_list(Values), length(Values) > 0 ->
+  case lists:all(fun jsv:is_keyword/1, Values) of
+    true ->
+      ok;
+    false ->
+      invalid
+  end;
+verify_constraint({values, _}, _) ->
+  invalid;
+
 verify_constraint(_, _) ->
   unknown.
 
@@ -59,7 +71,17 @@ format_constraint_violation({prefix, Prefix}, _) ->
   {"value must start with \"~ts\"", [Prefix]};
 
 format_constraint_violation({suffix, Suffix}, _) ->
-  {"value must end with \"~ts\"", [Suffix]}.
+  {"value must end with \"~ts\"", [Suffix]};
+
+format_constraint_violation({values, [Keyword]}, _) ->
+  String = json:serialize(jsv:keyword_value(Keyword)),
+  {"value must be the string \"~ts\"", [String]};
+format_constraint_violation({values, Keywords}, _) ->
+  Strings = lists:map(fun (K) ->
+                          json:serialize(jsv:keyword_value(K))
+                      end, Keywords),
+  Data = lists:join(<<", ">>, Strings),
+  {"value must be one of the following strings: \"~ts\"", [Data]}.
 
 validate_type(Value) when is_binary(Value) ->
   ok;
@@ -91,6 +113,15 @@ validate_constraint(Value, {suffix, Suffix}, _) ->
     Suffix ->
       ok;
     _ ->
+      invalid
+  end;
+
+validate_constraint(Value, {values, Keywords}, _) ->
+  F = fun (K) -> jsv:keyword_equal(K, Value) end,
+  case lists:any(F, Keywords) of
+    true ->
+      ok;
+    false ->
       invalid
   end.
 

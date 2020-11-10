@@ -18,7 +18,7 @@
          validate/2, validate/3,
          verify_definition/2,
          format_value_error/2, format_value_errors/2,
-         is_keyword/1, keyword_value/1]).
+         is_keyword/1, keyword_value/1, keyword_equal/2]).
 
 -export_type([definition/0,
               type/0, type_map/0,
@@ -214,3 +214,15 @@ keyword_value(K) when is_atom(K) ->
   atom_to_binary(K);
 keyword_value(K) when is_list(K) ->
   unicode:characters_to_binary(K).
+
+-spec keyword_equal(keyword(), keyword()) -> boolean().
+keyword_equal(K1, K2) when is_binary(K1), is_binary(K2) ->
+  K1 =:= K2;
+keyword_equal(K1, K2) when is_atom(K1), is_atom(K2) ->
+  K1 =:= K2;
+keyword_equal(K1, K2) when is_list(K1), is_list(K2) ->
+  K1 =:= K2;
+keyword_equal(K1, K2) when is_list(K1), is_list(K2) ->
+  K1 =:= K2;
+keyword_equal(K1, K2) ->
+  keyword_value(K1) =:= keyword_value(K2).

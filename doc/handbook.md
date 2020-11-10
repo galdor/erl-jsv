@@ -77,6 +77,7 @@ Constraints:
 - `max_length`: the maximum length of the string.
 - `prefix`: a prefix the string must start with.
 - `suffix`: a suffix the string must end with.
+- `values`: a list of possible values of the string.
 
 Note that the length of a string is the number of characters in the string,
 and not the number of bytes in its representation. Since erl-jsv relies on the

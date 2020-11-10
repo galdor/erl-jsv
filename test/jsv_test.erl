@@ -100,7 +100,13 @@ validate_string_test_() ->
    ?_assertMatch({error, _}, jsv:validate(<<"foo">>,
                                           {string, #{suffix => <<"bar">>}})),
    ?_assertMatch({error, _}, jsv:validate(<<"aar">>,
-                                          {string, #{suffix => <<"bar">>}}))].
+                                          {string, #{suffix => <<"bar">>}})),
+   ?_assertMatch(ok, jsv:validate(<<"foo">>,
+                                  {string, #{values => [<<"foo">>]}})),
+   ?_assertMatch(ok, jsv:validate(<<"foo">>,
+                                  {string, #{values => [foo, "bar"]}})),
+   ?_assertMatch({error, _}, jsv:validate(<<"foo">>,
+                                          {string, #{values => [a, "b"]}}))].
 
 validate_array_test_() ->
   [?_assertEqual(ok, jsv:validate([], array)),
