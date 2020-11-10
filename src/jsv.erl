@@ -74,12 +74,11 @@ validate(Value, Definition) ->
 -spec validate(json:value(), definition(), options()) ->
         ok | {error, [value_error()]}.
 validate(Value, Definition, Options) ->
-  TypeMap = maps:get(type_map, Options, default_type_map()),
   case maps:get(disable_verification, Options, false) of
     true ->
       ok;
     false ->
-      case verify_definition(Definition, TypeMap) of
+      case verify_definition(Definition, Options) of
         ok ->
           ok;
         {error, DefinitionErrors} ->
@@ -94,32 +93,33 @@ validate(Value, Definition, Options) ->
       Errors2 = lists:reverse(Errors),
       Errors3 = case maps:get(format_value_errors, Options, false) of
                   true ->
-                    format_value_errors(Errors2, TypeMap);
+                    format_value_errors(Errors2, Options);
                   false ->
                     Errors2
                 end,
       {error, Errors3}
   end.
 
--spec verify_definition(definition(), type_map()) ->
+-spec verify_definition(definition(), options()) ->
         ok | {error, [definition_error()]}.
-verify_definition(Definition, TypeMap) when is_atom(Definition) ->
-  verify_definition({Definition, #{}}, TypeMap);
-verify_definition({TypeName, Constraints}, TypeMap) when
+verify_definition(Definition, Options) when is_atom(Definition) ->
+  verify_definition({Definition, #{}}, Options);
+verify_definition({TypeName, Constraints}, Options) when
     is_atom(TypeName), is_map(Constraints) ->
+  TypeMap = maps:get(type_map, Options, default_type_map()),
   case maps:find(TypeName, TypeMap) of
     {ok, Module} ->
       Exported = lists:member({verify_constraint, 2},
                               Module:module_info(exports)),
       VerifyConstraint = case Exported of
                            true ->
-                             fun (C, TM) -> Module:verify_constraint(C, TM) end;
+                             fun (C, Os) -> Module:verify_constraint(C, Os) end;
                            false ->
                              fun (_, _) -> unknown end
                          end,
       F = fun (ConstraintName, ConstraintValue, Errors) ->
               Constraint = {ConstraintName, ConstraintValue},
-              case VerifyConstraint(Constraint, TypeMap) of
+              case VerifyConstraint(Constraint, Options) of
                 ok ->
                   Errors;
                 unknown ->
@@ -147,9 +147,10 @@ verify_definition({TypeName, Constraints}, TypeMap) when
 verify_definition(Definition, _) ->
   {error, [{invalid_format, Definition}]}.
 
--spec format_value_error(value_error(), type_map()) -> value_error().
+-spec format_value_error(value_error(), options()) -> value_error().
 format_value_error(Error = #{reason := Reason, pointer := Pointer},
-                   TypeMap) ->
+                   Options) ->
+  TypeMap = maps:get(type_map, Options, default_type_map()),
   Msg = case Reason of
           {invalid_type, ExpectedType} ->
             io_lib:format(<<"value is not of type ~0tp">>, [ExpectedType]);
@@ -177,8 +178,8 @@ format_value_error(Error = #{reason := Reason, pointer := Pointer},
 
 -spec format_value_errors([value_error()], type_map()) ->
         [value_error()].
-format_value_errors(Errors, TypeMap) ->
-  lists:map(fun (Error) -> format_value_error(Error, TypeMap) end, Errors).
+format_value_errors(Errors, Options) ->
+  lists:map(fun (Error) -> format_value_error(Error, Options) end, Errors).
 
 -spec default_type_map() -> type_map().
 default_type_map() ->

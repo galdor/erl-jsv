@@ -17,7 +17,7 @@
 -optional_callbacks([verify_constraint/2, format_constraint_violation/2,
                      validate_constraint/3]).
 
--callback verify_constraint(jsv:constraint(), jsv:type_map()) ->
+-callback verify_constraint(jsv:constraint(), jsv:options()) ->
   ok | unknown | invalid | {invalid, term()} |
   {error, [jsv:definition_error()]}.
 
