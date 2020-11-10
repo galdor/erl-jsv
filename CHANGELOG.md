@@ -5,6 +5,8 @@
 - Introduce keywords, which are values of type binary, string or atom.
 - Use keywords for member names in object constraints.
 - Add a `values` constraint for strings.
+## Misc
+- Rename the `element_type` constraint to `element`.
 
 # 1.1.0
 ## Features

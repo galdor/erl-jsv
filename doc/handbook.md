@@ -13,7 +13,7 @@ define.
 For example, the following definition represents arrays containing at least 3
 strictly positive integers:
 ```erlang
-{array, #{element_type => {integer, #{min => 1}},
+{array, #{element => {integer, #{min => 1}},
           min_length => 3}}
 ```
 
@@ -89,7 +89,7 @@ Represents a JSON array.
 
 Constraints:
 
-- `element_type`: the definition that must apply to all elements.
+- `element`: the definition that must apply to all elements.
 - `min_length`: the minimal number of elements in the array.
 - `max_length`: the maximum number of elements in the array.
 
@@ -175,7 +175,7 @@ that:
 
 Example:
 ```erlang
-Definition = {array, #{element_type => {integer, #{min => 1}}}},
+Definition = {array, #{element => {integer, #{min => 1}}}},
 jsv:verify_definition(Definition, jsv:default_type_map()).
 ```
 
@@ -185,7 +185,7 @@ definition.
 
 Example:
 ```erlang
-Definition = {array, #{element_type => {integer, #{min => 1}}}},
+Definition = {array, #{element => {integer, #{min => 1}}}},
 jsv:validate([1, 1, 3, 5], Definition).
 ```
 

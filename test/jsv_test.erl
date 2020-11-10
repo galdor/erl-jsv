@@ -120,23 +120,23 @@ validate_array_test_() ->
    ?_assertEqual(ok, jsv:validate([], {array, #{max_length => 3}})),
    ?_assertMatch({error, _}, jsv:validate([1, 2, 3, 4],
                                           {array, #{max_length => 3}})),
-   ?_assertEqual(ok, jsv:validate([], {array, #{element_type => integer}})),
+   ?_assertEqual(ok, jsv:validate([], {array, #{element => integer}})),
    ?_assertEqual(ok, jsv:validate([1, 2, 3],
-                                  {array, #{element_type => integer}})),
+                                  {array, #{element => integer}})),
    ?_assertMatch({error, _}, jsv:validate([true],
-                                          {array, #{element_type => integer}})),
+                                          {array, #{element => integer}})),
    ?_assertMatch({error, _}, jsv:validate([1, 2, null],
-                                          {array, #{element_type => integer}})),
+                                          {array, #{element => integer}})),
    ?_assertEqual(ok, jsv:validate([[], [1, 2.5], [3.0]],
-                                  {array, #{element_type =>
-                                              {array, #{element_type =>
+                                  {array, #{element =>
+                                              {array, #{element =>
                                                           number}}}})),
    ?_assertMatch({error, _}, jsv:validate([0, [1, 2.5], [3.0]],
-                                  {array, #{element_type =>
-                                              {array, #{element_type =>
-                                                          number}}}})),
-   ?_assertEqual(ok, jsv:validate([], {array, #{element_type =>
-                                                  {array, #{element_type =>
+                                          {array, #{element =>
+                                                      {array, #{element =>
+                                                                  number}}}})),
+   ?_assertEqual(ok, jsv:validate([], {array, #{element =>
+                                                  {array, #{element =>
                                                               number}}}}))].
 
 validate_object_test_() ->
@@ -205,10 +205,10 @@ validate_uuid_test_() ->
    ?_assertMatch({error, _}, jsv:validate(<<"foobar">>, uuid)),
    ?_assertMatch({error, _},
                  jsv:validate(<<"xyb4cb80-4c66-4ed4-b248-7b52925130f1">>,
-                             uuid)),
+                              uuid)),
    ?_assertMatch({error, _},
                  jsv:validate(<<"cab4cb80-4c66-4ed4-b248-7b52925130f1-12">>,
-                             uuid))].
+                              uuid))].
 
 validate_uri_test_() ->
   [?_assertEqual(ok, jsv:validate(<<"http://example.com">>, uri)),

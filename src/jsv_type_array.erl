@@ -21,11 +21,11 @@
 
 -export_type([constraint/0]).
 
--type constraint() :: {element_type, jsv:definition()}
+-type constraint() :: {element, jsv:definition()}
                     | {min_length, non_neg_integer()}
                     | {max_length, non_neg_integer()}.
 
-verify_constraint({element_type, Definition}, TypeMap) ->
+verify_constraint({element, Definition}, TypeMap) ->
   jsv:verify_definition(Definition, TypeMap);
 verify_constraint({min_length, Min}, _) when is_integer(Min), Min >= 0 ->
   ok;
@@ -49,7 +49,7 @@ validate_type(Value) when is_list(Value) ->
 validate_type(_) ->
   error.
 
-validate_constraint(Value, {element_type, ElementType}, State) ->
+validate_constraint(Value, {element, ElementType}, State) ->
   F = fun (I, Element, Errors) ->
           case
             jsv_validator:validate_child(Element, ElementType,
