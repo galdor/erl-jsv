@@ -13,6 +13,8 @@ define.
 Definitions are represented as one of the following values:
 - `Type`: a type assertion without any constraint.
 - `{Type, Constraints}`: a type assertion with a set of constraints.
+- `{definition, DefinitionName}`: a reference to a definition in the current
+  catalog.
 - `{definition, CatalogName, DefinitionName}`: a reference to a definition
   from a catalog.
 

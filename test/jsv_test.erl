@@ -337,4 +337,15 @@ validate_catalogs_test_() ->
                                   #{catalogs => #{a => #{b => integer}}})),
    ?_assertMatch({error, _},
                  jsv:validate(42, {definition, a, b},
-                              #{catalogs => #{a => #{b => string}}}))].
+                              #{catalogs => #{a => #{b => string}}})),
+   ?_assertError({invalid_definition, [{unknown_definition, a, c}]},
+                 jsv:validate(42, {definition, a, b},
+                              #{catalogs => #{a => #{b => {definition, c}}}})),
+   ?_assertError({invalid_definition, [{unknown_definition, a, d}]},
+                 jsv:validate(42, {definition, a, b},
+                              #{catalogs => #{a => #{b => {definition, c},
+                                                     c => {definition, d}}}})),
+   ?_assertEqual(ok, jsv:validate(42, {definition, a, b},
+                                  #{catalogs => #{a => #{b => {definition, c},
+                                                         c => {definition, d},
+                                                         d => integer}}}))].

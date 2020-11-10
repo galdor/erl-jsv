@@ -17,7 +17,8 @@
 -export([init/2, verify/1]).
 
 -type state() :: #{options := jsv:options(),
-                   definition := jsv:definition()}.
+                   definition := jsv:definition(),
+                   catalog => jsv:catalog_name()}.
 
 -spec init(jsv:definition(), jsv:options()) -> state().
 init(Definition, Options) ->
@@ -28,11 +29,18 @@ init(Definition, Options) ->
 verify(State = #{definition := TypeName}) when
     is_atom(TypeName) ->
   verify(State#{definition => {TypeName, #{}}});
+verify(State = #{definition := {definition, DefinitionName}}) ->
+  case maps:find(catalog, State) of
+    {ok, Catalog} ->
+      verify(State#{definition := {definition, Catalog, DefinitionName}});
+    error ->
+      {error, [no_current_catalog]}
+  end;
 verify(State = #{options := Options,
-                 definition := {definition, CatalogName, DefinitionName}}) ->
-  case jsv:find_catalog_definition(Options, CatalogName, DefinitionName) of
+                 definition := {definition, Catalog, DefinitionName}}) ->
+  case jsv:find_catalog_definition(Options, Catalog, DefinitionName) of
     {ok, Definition} ->
-      verify(State#{definition => Definition});
+      verify(State#{definition => Definition, catalog => Catalog});
     {error, Reason} ->
       {error, [Reason]}
   end;

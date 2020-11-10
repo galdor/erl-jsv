@@ -22,7 +22,8 @@
                      value := json:value(),
                      pointer := json_pointer:pointer(),
                      definition := jsv:definition(),
-                     type_map := jsv:type_map()}.
+                     type_map := jsv:type_map(),
+                     catalog => jsv:catalog_name()}.
 
 -spec init(json:value(), jsv:definition(), jsv:options()) -> state().
 init(Value, Definition, Options) ->
@@ -38,10 +39,18 @@ init(Value, Definition, Options) ->
 validate(State = #{definition := Definition}) when is_atom(Definition) ->
   validate(State#{definition => {Definition, #{}}});
 validate(State = #{options := Options,
-                   definition := {definition, CatalogName, DefinitionName}}) ->
+                   definition := {definition, Catalog, DefinitionName}}) ->
   {ok, Definition} = jsv:find_catalog_definition(Options,
-                                                 CatalogName, DefinitionName),
-  validate(State#{definition => Definition});
+                                                 Catalog, DefinitionName),
+  validate(State#{definition => Definition,
+                  catalog => Catalog});
+validate(State = #{definition := {definition, DefinitionName}}) ->
+  case maps:find(catalog, State) of
+    {ok, Catalog} ->
+      validate(State#{definition => {definition, Catalog, DefinitionName}});
+    error ->
+      {error, [no_current_catalog]}
+  end;
 validate(State = #{value := Value,
                    definition := {Type, _},
                    type_map := TypeMap}) ->

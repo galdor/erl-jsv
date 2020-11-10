@@ -34,6 +34,7 @@
 
 -type definition() :: type()
                     | {type(), constraints()}
+                    | {definition, definition_name()}
                     | {definition, catalog_name(), definition_name()}.
 
 -type definition_name() :: atom().
@@ -75,7 +76,8 @@
 
 -type catalog_definition_error_reason() ::
         {unknown_catalog, catalog_name()}
-      | {unknown_definition, catalog_name(), definition_name()}.
+      | {unknown_definition, catalog_name(), definition_name()}
+      | no_current_catalog.
 
 -type constraint_violation_details() :: undefined | term().
 
