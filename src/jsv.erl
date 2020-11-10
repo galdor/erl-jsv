@@ -34,8 +34,8 @@
 
 -type definition() :: type()
                     | {type(), constraints()}
-                    | {definition, definition_name()}
-                    | {definition, catalog_name(), definition_name()}.
+                    | {ref, definition_name()}
+                    | {ref, catalog_name(), definition_name()}.
 
 -type definition_name() :: atom().
 

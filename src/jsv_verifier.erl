@@ -29,15 +29,15 @@ init(Definition, Options) ->
 verify(State = #{definition := TypeName}) when
     is_atom(TypeName) ->
   verify(State#{definition => {TypeName, #{}}});
-verify(State = #{definition := {definition, DefinitionName}}) ->
+verify(State = #{definition := {ref, DefinitionName}}) ->
   case maps:find(catalog, State) of
     {ok, Catalog} ->
-      verify(State#{definition := {definition, Catalog, DefinitionName}});
+      verify(State#{definition := {ref, Catalog, DefinitionName}});
     error ->
       {error, [no_current_catalog]}
   end;
 verify(State = #{options := Options,
-                 definition := {definition, Catalog, DefinitionName}}) ->
+                 definition := {ref, Catalog, DefinitionName}}) ->
   case jsv:find_catalog_definition(Options, Catalog, DefinitionName) of
     {ok, Definition} ->
       verify(State#{definition => Definition, catalog => Catalog});

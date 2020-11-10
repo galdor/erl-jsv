@@ -13,10 +13,9 @@ define.
 Definitions are represented as one of the following values:
 - `Type`: a type assertion without any constraint.
 - `{Type, Constraints}`: a type assertion with a set of constraints.
-- `{definition, DefinitionName}`: a reference to a definition in the current
+- `{ref, DefinitionName}`: a reference to a definition in the current catalog.
+- `{ref, CatalogName, DefinitionName}`: a reference to a definition from a
   catalog.
-- `{definition, CatalogName, DefinitionName}`: a reference to a definition
-  from a catalog.
 
 For example, the following definition represents arrays containing at least 3
 strictly positive integers:
@@ -60,7 +59,7 @@ Catalogs are passed to verification and validation functions.
 
 Example:
 ```erlang
-jsv:validate(42, {definition, api, score},
+jsv:validate(42, {ref, api, score},
              #{catalogs => #{api => #{score => integer}}}).
 ```
 

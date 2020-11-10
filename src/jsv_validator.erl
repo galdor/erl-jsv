@@ -36,18 +36,18 @@ init(Value, Definition, Options) ->
 
 -spec validate(state()) ->
         ok | {error, [jsv:value_error()]}.
-validate(State = #{definition := Definition}) when is_atom(Definition) ->
-  validate(State#{definition => {Definition, #{}}});
+validate(State = #{definition := TypeName}) when is_atom(TypeName) ->
+  validate(State#{definition => {TypeName, #{}}});
 validate(State = #{options := Options,
-                   definition := {definition, Catalog, DefinitionName}}) ->
+                   definition := {ref, Catalog, DefinitionName}}) ->
   {ok, Definition} = jsv:find_catalog_definition(Options,
                                                  Catalog, DefinitionName),
   validate(State#{definition => Definition,
                   catalog => Catalog});
-validate(State = #{definition := {definition, DefinitionName}}) ->
+validate(State = #{definition := {ref, DefinitionName}}) ->
   case maps:find(catalog, State) of
     {ok, Catalog} ->
-      validate(State#{definition => {definition, Catalog, DefinitionName}});
+      validate(State#{definition => {ref, Catalog, DefinitionName}});
     error ->
       {error, [no_current_catalog]}
   end;
