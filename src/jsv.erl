@@ -119,56 +119,9 @@ validate(Value, Definition, Options) ->
 
 -spec verify_definition(definition(), options()) ->
         ok | {error, [definition_error()]}.
-verify_definition(Definition, Options) when is_atom(Definition) ->
-  verify_definition({Definition, #{}}, Options);
-verify_definition({definition, CatalogName, DefinitionName}, Options) ->
-  case find_catalog_definition(Options, CatalogName, DefinitionName) of
-    {ok, Definition} ->
-      verify_definition(Definition, Options);
-    {error, Reason} ->
-      {error, [Reason]}
-  end;
-verify_definition({TypeName, Constraints}, Options) when
-    is_atom(TypeName), is_map(Constraints) ->
-  case maps:find(TypeName, type_map(Options)) of
-    {ok, Module} ->
-      Exported = lists:member({verify_constraint, 2},
-                              Module:module_info(exports)),
-      VerifyConstraint = case Exported of
-                           true ->
-                             fun (C, Os) -> Module:verify_constraint(C, Os) end;
-                           false ->
-                             fun (_, _) -> unknown end
-                         end,
-      F = fun (ConstraintName, ConstraintValue, Errors) ->
-              Constraint = {ConstraintName, ConstraintValue},
-              case VerifyConstraint(Constraint, Options) of
-                ok ->
-                  Errors;
-                unknown ->
-                  [{unknown_constraint, TypeName, Constraint} | Errors];
-                invalid ->
-                  Error = {invalid_constraint, TypeName, Constraint,
-                           invalid_value},
-                  [Error | Errors];
-                {invalid, Reason} ->
-                  Error = {invalid_constraint, TypeName, Constraint, Reason},
-                  [Error | Errors];
-                {error, ValidationErrors} ->
-                  ValidationErrors ++ Errors
-              end
-          end,
-      case maps:fold(F, [], Constraints) of
-        [] ->
-          ok;
-        Errors ->
-          {error, Errors}
-      end;
-    error ->
-      {error, [{unknown_type, TypeName}]}
-  end;
-verify_definition(Definition, _) ->
-  {error, [{invalid_format, Definition}]}.
+verify_definition(Definition, Options) ->
+  State = jsv_verifier:init(Definition, Options),
+  jsv_verifier:verify(State).
 
 -spec format_value_error(value_error(), options()) -> value_error().
 format_value_error(Error = #{reason := Reason, pointer := Pointer},
