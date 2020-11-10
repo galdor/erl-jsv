@@ -1,6 +1,9 @@
 % erl-jsv changelog
 
 # Next Version
+## Features
+- Introduce keywords, which are values of type binary, string or atom.
+- Use keywords for member names in object constraints.
 
 # 1.1.0
 ## Features

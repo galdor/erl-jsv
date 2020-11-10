@@ -182,7 +182,13 @@ validate_object_test_() ->
    ?_assertMatch({error, _}, jsv:validate(#{<<"a">> => 1, <<"b">> => true},
                                           {object, #{members =>
                                                        #{<<"a">> => integer,
-                                                         <<"b">> => null}}}))].
+                                                         <<"b">> => null}}})),
+   ?_assertMatch(ok, jsv:validate(#{<<"a">> => 1, <<"b">> => true},
+                                  {object, #{members =>
+                                               #{"a" => integer,
+                                                 b => boolean},
+                                             required =>
+                                               [a, "b"]}}))].
 
 validate_uuid_test_() ->
   [?_assertEqual(ok, jsv:validate(<<"cab4cb80-4c66-4ed4-b248-7b52925130f1">>,

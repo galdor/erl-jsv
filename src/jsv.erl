@@ -17,7 +17,8 @@
 -export([default_type_map/0,
          validate/2, validate/3,
          verify_definition/2,
-         format_value_error/2, format_value_errors/2]).
+         format_value_error/2, format_value_errors/2,
+         is_keyword/1, keyword_value/1]).
 
 -export_type([definition/0,
               type/0, type_map/0,
@@ -26,7 +27,8 @@
               options/0,
               definition_error/0,
               value_error/0, value_error_reason/0,
-              constraint_violation_details/0]).
+              constraint_violation_details/0,
+              keyword/0]).
 
 -type definition() :: type() | {type(), constraints()}.
 
@@ -59,6 +61,11 @@
                                constraint_violation_details()}.
 
 -type constraint_violation_details() :: undefined | term().
+
+%% Keywords are used in multiple types of constraints for literal JSON strings
+%% where having to type literal Erlang binaries would be painful. Object keys
+%% are the most obvious example.
+-type keyword() :: binary() | string() | atom().
 
 -spec validate(json:value(), definition()) -> ok | {error, [value_error()]}.
 validate(Value, Definition) ->
@@ -188,3 +195,22 @@ default_type_map() ->
     time => jsv_type_time,
     date => jsv_type_date,
     datetime => jsv_type_datetime}.
+
+-spec is_keyword(json:value()) -> boolean().
+is_keyword(Value) when is_binary(Value); is_atom(Value) ->
+  true;
+is_keyword(Value) when is_list(Value) ->
+  lists:all(fun
+              (E) when is_integer(E), E > 0 ->
+               true;
+              (_) ->
+               false
+           end, Value).
+
+-spec keyword_value(keyword()) -> binary().
+keyword_value(K) when is_binary(K) ->
+  K;
+keyword_value(K) when is_atom(K) ->
+  atom_to_binary(K);
+keyword_value(K) when is_list(K) ->
+  unicode:characters_to_binary(K).
