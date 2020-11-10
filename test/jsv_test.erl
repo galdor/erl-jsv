@@ -326,3 +326,15 @@ validate_datetime_test_() ->
                  jsv:validate(<<"2010-01-01T13:00:00+02:00">>,
                               {datetime, #{max => {{2010, 1, 1},
                                                    {12, 0, 0}}}}))].
+
+validate_catalogs_test_() ->
+  [?_assertError({invalid_definition, [{unknown_catalog, a}]},
+                 jsv:validate(42, {definition, a, b})),
+   ?_assertError({invalid_definition, [{unknown_definition, a, b}]},
+                 jsv:validate(42, {definition, a, b},
+                              #{catalogs => #{a => #{}}})),
+   ?_assertEqual(ok, jsv:validate(42, {definition, a, b},
+                                  #{catalogs => #{a => #{b => integer}}})),
+   ?_assertMatch({error, _},
+                 jsv:validate(42, {definition, a, b},
+                              #{catalogs => #{a => #{b => string}}}))].

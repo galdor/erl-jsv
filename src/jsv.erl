@@ -18,9 +18,11 @@
          validate/2, validate/3,
          verify_definition/2,
          format_value_error/2, format_value_errors/2,
+         type_map/1, find_catalog_definition/3,
          is_keyword/1, keyword_value/1, keyword_equal/2]).
 
--export_type([definition/0,
+-export_type([definition/0, definition_name/0,
+              catalog/0, catalog_name/0, catalog_table/0,
               type/0, type_map/0,
               constraints/0, constraint/0,
               constraint_name/0, constraint_value/0,
@@ -30,7 +32,15 @@
               constraint_violation_details/0,
               keyword/0]).
 
--type definition() :: type() | {type(), constraints()}.
+-type definition() :: type()
+                    | {type(), constraints()}
+                    | {definition, catalog_name(), definition_name()}.
+
+-type definition_name() :: atom().
+
+-type catalog() :: #{definition_name() := definition()}.
+-type catalog_name() :: atom().
+-type catalog_table() :: #{catalog_name() := catalog()}.
 
 -type type() :: atom().
 -type type_map() :: #{type() := module()}.
@@ -42,23 +52,30 @@
 
 -type options() :: #{type_map => type_map(),
                      format_value_errors => boolean(),
-                     disable_verification => boolean()}.
+                     disable_verification => boolean(),
+                     catalogs => catalog_table()}.
 
 -type definition_error() :: {invalid_format, term()}
                           | {unknown_type, type()}
                           | {unknown_constraint, jsv:type(), jsv:constraint()}
                           | {invalid_constraint, jsv:type(),
-                             jsv:constraint(), term()}.
+                             jsv:constraint(), term()}
+                          | catalog_definition_error_reason().
 
 -type value_error() :: #{reason := value_error_reason(),
                          reason_string => binary(),
                          value := json:value(),
                          pointer := json_pointer:pointer(),
                          pointer_string => binary()}.
+
 -type value_error_reason() :: {invalid_type, ExpectedType :: jsv:type()}
                             | {constraint_violation, jsv:type(), constraint()}
                             | {constraint_violation, jsv:type(), constraint(),
                                constraint_violation_details()}.
+
+-type catalog_definition_error_reason() ::
+        {unknown_catalog, catalog_name()}
+      | {unknown_definition, catalog_name(), definition_name()}.
 
 -type constraint_violation_details() :: undefined | term().
 
@@ -104,10 +121,16 @@ validate(Value, Definition, Options) ->
         ok | {error, [definition_error()]}.
 verify_definition(Definition, Options) when is_atom(Definition) ->
   verify_definition({Definition, #{}}, Options);
+verify_definition({definition, CatalogName, DefinitionName}, Options) ->
+  case find_catalog_definition(Options, CatalogName, DefinitionName) of
+    {ok, Definition} ->
+      verify_definition(Definition, Options);
+    {error, Reason} ->
+      {error, [Reason]}
+  end;
 verify_definition({TypeName, Constraints}, Options) when
     is_atom(TypeName), is_map(Constraints) ->
-  TypeMap = maps:get(type_map, Options, default_type_map()),
-  case maps:find(TypeName, TypeMap) of
+  case maps:find(TypeName, type_map(Options)) of
     {ok, Module} ->
       Exported = lists:member({verify_constraint, 2},
                               Module:module_info(exports)),
@@ -150,7 +173,7 @@ verify_definition(Definition, _) ->
 -spec format_value_error(value_error(), options()) -> value_error().
 format_value_error(Error = #{reason := Reason, pointer := Pointer},
                    Options) ->
-  TypeMap = maps:get(type_map, Options, default_type_map()),
+  TypeMap = type_map(Options),
   Msg = case Reason of
           {invalid_type, ExpectedType} ->
             io_lib:format(<<"value is not of type ~0tp">>, [ExpectedType]);
@@ -196,6 +219,26 @@ default_type_map() ->
     time => jsv_type_time,
     date => jsv_type_date,
     datetime => jsv_type_datetime}.
+
+-spec type_map(options()) -> type_map().
+type_map(Options) ->
+  maps:get(type_map, Options, default_type_map()).
+
+-spec find_catalog_definition(options(), catalog_name(), definition_name()) ->
+        {ok, definition()} | {error, catalog_definition_error_reason()}.
+find_catalog_definition(Options, CatalogName, DefinitionName) ->
+  Catalogs = maps:get(catalogs, Options, #{}),
+  case maps:find(CatalogName, Catalogs) of
+    {ok, Catalog} ->
+      case maps:find(DefinitionName, Catalog) of
+        {ok, Definition} ->
+          {ok, Definition};
+        error ->
+          {error, {unknown_definition, CatalogName, DefinitionName}}
+      end;
+    error ->
+      {error, {unknown_catalog, CatalogName}}
+  end.
 
 -spec is_keyword(json:value()) -> boolean().
 is_keyword(Value) when is_binary(Value); is_atom(Value) ->

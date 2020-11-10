@@ -18,7 +18,8 @@
 
 -export_type([state/0]).
 
--opaque state() :: #{value := json:value(),
+-opaque state() :: #{options := jsv:options(),
+                     value := json:value(),
                      pointer := json_pointer:pointer(),
                      definition := jsv:definition(),
                      type_map := jsv:type_map()}.
@@ -26,7 +27,8 @@
 -spec init(json:value(), jsv:definition(), jsv:options()) -> state().
 init(Value, Definition, Options) ->
   TypeMap = maps:get(type_map, Options, jsv:default_type_map()),
-  #{value => Value,
+  #{options => Options,
+    value => Value,
     pointer => [],
     definition => Definition,
     type_map => TypeMap}.
@@ -35,6 +37,11 @@ init(Value, Definition, Options) ->
         ok | {error, [jsv:value_error()]}.
 validate(State = #{definition := Definition}) when is_atom(Definition) ->
   validate(State#{definition => {Definition, #{}}});
+validate(State = #{options := Options,
+                   definition := {definition, CatalogName, DefinitionName}}) ->
+  {ok, Definition} = jsv:find_catalog_definition(Options,
+                                                 CatalogName, DefinitionName),
+  validate(State#{definition => Definition});
 validate(State = #{value := Value,
                    definition := {Type, _},
                    type_map := TypeMap}) ->

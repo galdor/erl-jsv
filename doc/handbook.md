@@ -10,6 +10,12 @@ set of constraints. Definitions are represented either as a `{Type,
 Constraints}` tuple or simply as a `Type` atom when there is no constraint to
 define.
 
+Definitions are represented as one of the following values:
+- `Type`: a type assertion without any constraint.
+- `{Type, Constraints}`: a type assertion with a set of constraints.
+- `{definition, CatalogName, DefinitionName}`: a reference to a definition
+  from a catalog.
+
 For example, the following definition represents arrays containing at least 3
 strictly positive integers:
 ```erlang
@@ -37,6 +43,24 @@ type to the module implementing the type.
 The default type map, returned by `jsd:default_type_map/0`, contains a set of
 default types useful for various kinds of JSON data. Users are free to extend
 it or replace it altogether.
+
+# Catalogs
+Catalogs are collection of definitions which can be referenced from any other
+definitions.
+
+Example:
+```erlang
+#{user_id => uuid,
+  user_name => {string, #{min_length => 2, max_length => 64}}}
+```
+
+Catalogs are passed to verification and validation functions.
+
+Example:
+```erlang
+jsv:validate(42, {definition, api, score},
+             #{catalogs => #{api => #{score => integer}}}).
+```
 
 ## Default types
 ### any
@@ -203,3 +227,4 @@ For `jsv:validate/3`, the following options are available:
 - `format_value_errors`: if validation fails, add textual information to error
   values.
 - `disable_verification`: do not verify the definition before validation.
+- `catalogs`: a set of catalogs to use during verification and validation.
