@@ -85,7 +85,7 @@ format_constraint_violation({max_size, Max}, _) ->
 format_constraint_violation({required, _}, {missing_names, [Name]}) ->
   {"value must contain the following member: ~ts", [Name]};
 format_constraint_violation({required, _}, {missing_names, Names}) ->
-  Data = lists:join(<<", ">>, Names),
+  Data = lists:join(<<", ">>, lists:map(fun jsv:keyword_value/1, Names)),
   {"value must contain the following members: ~ts", [iolist_to_binary(Data)]}.
 
 validate_type(Value) when is_map(Value) ->
