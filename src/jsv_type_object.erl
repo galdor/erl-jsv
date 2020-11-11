@@ -114,8 +114,9 @@ validate_constraint(Value, {max_size, Max}, _) ->
   map_size(Value) =< Max;
 
 validate_constraint(Value, {required, Names}, _) ->
-  F = fun (Name, MissingNames) ->
-          case maps:is_key(jsv:keyword_value(Name), Value) of
+  F = fun (Name0, MissingNames) ->
+          Name = jsv:keyword_value(Name0),
+          case maps:is_key(Name, Value) of
             true ->
               MissingNames;
             false ->
@@ -130,8 +131,9 @@ validate_constraint(Value, {required, Names}, _) ->
   end;
 
 validate_constraint(Value, {members, Definitions}, State) ->
-  F = fun (MemberName, Definition, Errors) ->
-          case maps:find(jsv:keyword_value(MemberName), Value) of
+  F = fun (MemberName0, Definition, Errors) ->
+          MemberName = jsv:keyword_value(MemberName0),
+          case maps:find(MemberName, Value) of
             {ok, MemberValue} ->
               case
                 jsv_validator:validate_child(MemberValue, Definition,
