@@ -126,7 +126,7 @@ validate_constraint(Value, {required, Names}, _) ->
     [] ->
       ok;
     MissingNames ->
-      {invalid, lists:reverse(MissingNames)}
+      {invalid, {missing_names, lists:reverse(MissingNames)}}
   end;
 
 validate_constraint(Value, {members, Definitions}, State) ->
