@@ -27,8 +27,8 @@
                     | {required, Names :: [jsv:keyword()]}
                     | {members, #{jsv:keyword() := jsv:definition()}}.
 
-verify_constraint({value_type, Definition}, Options) ->
-  jsv:verify_definition(Definition, Options);
+verify_constraint({value_type, Definition}, State) ->
+  jsv:verify_definition(Definition, State);
 
 verify_constraint({min_size, Min}, _) when is_integer(Min), Min >= 0 ->
   ok;
@@ -50,11 +50,11 @@ verify_constraint({required, Names}, _) when is_list(Names) ->
 verify_constraint({required, _}, _) ->
   invalid;
 
-verify_constraint({members, Definitions}, Options) when is_map(Definitions) ->
+verify_constraint({members, Definitions}, State) when is_map(Definitions) ->
   case lists:all(fun jsv:is_keyword/1, maps:keys(Definitions)) of
     true ->
       F = fun (_, Definition, Errors) ->
-              case jsv:verify_definition(Definition, Options) of
+              case jsv:verify_definition(Definition, State) of
                 ok ->
                   Errors;
                 {error, Errors2} ->

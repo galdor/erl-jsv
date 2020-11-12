@@ -25,8 +25,8 @@
                     | {min_length, non_neg_integer()}
                     | {max_length, non_neg_integer()}.
 
-verify_constraint({element, Definition}, Options) ->
-  jsv:verify_definition(Definition, Options);
+verify_constraint({element, Definition}, State) ->
+  jsv:verify_definition(Definition, State);
 verify_constraint({min_length, Min}, _) when is_integer(Min), Min >= 0 ->
   ok;
 verify_constraint({min_length, _}, _) ->

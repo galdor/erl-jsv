@@ -16,6 +16,8 @@
 
 -export([init/2, verify/1]).
 
+-export_type([state/0]).
+
 -type state() :: #{options := jsv:options(),
                    definition := jsv:definition(),
                    catalog => jsv:catalog_name()}.
@@ -43,8 +45,8 @@ verify(State = #{definition := {ref, Catalog, DefinitionName}}) ->
     {error, Reason} ->
       {error, [Reason]}
   end;
-verify(#{options := Options,
-         definition := {TypeName, Constraints}}) when
+verify(State = #{options := Options,
+                 definition := {TypeName, Constraints}}) when
     is_atom(TypeName), is_map(Constraints) ->
   case maps:find(TypeName, jsv:type_map(Options)) of
     {ok, Module} ->
@@ -52,13 +54,13 @@ verify(#{options := Options,
                               Module:module_info(exports)),
       VerifyConstraint = case Exported of
                            true ->
-                             fun (C, Os) -> Module:verify_constraint(C, Os) end;
+                             fun (C, S) -> Module:verify_constraint(C, S) end;
                            false ->
                              fun (_, _) -> unknown end
                          end,
       F = fun (ConstraintName, ConstraintValue, Errors) ->
               Constraint = {ConstraintName, ConstraintValue},
-              case VerifyConstraint(Constraint, Options) of
+              case VerifyConstraint(Constraint, State) of
                 ok ->
                   Errors;
                 unknown ->
