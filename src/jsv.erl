@@ -18,11 +18,13 @@
          validate/2, validate/3,
          verify_definition/2,
          format_value_error/2, format_value_errors/2,
-         type_map/1, find_catalog_definition/3,
+         type_map/1,
+         catalog_table_name/1, install_catalog/2, find_catalog_definition/2,
          is_keyword/1, keyword_value/1, keyword_equal/2]).
 
 -export_type([definition/0, definition_name/0,
               catalog/0, catalog_name/0, catalog_table/0,
+              catalog_table_name/0,
               type/0, type_map/0,
               constraints/0, constraint/0,
               constraint_name/0, constraint_value/0,
@@ -42,6 +44,7 @@
 -type catalog() :: #{definition_name() := definition()}.
 -type catalog_name() :: atom().
 -type catalog_table() :: #{catalog_name() := catalog()}.
+-type catalog_table_name() :: atom().
 
 -type type() :: atom().
 -type type_map() :: #{type() := module()}.
@@ -53,8 +56,7 @@
 
 -type options() :: #{type_map => type_map(),
                      format_value_errors => boolean(),
-                     disable_verification => boolean(),
-                     catalogs => catalog_table()}.
+                     disable_verification => boolean()}.
 
 -type definition_error() :: {invalid_format, term()}
                           | {unknown_type, type()}
@@ -179,20 +181,28 @@ default_type_map() ->
 type_map(Options) ->
   maps:get(type_map, Options, default_type_map()).
 
--spec find_catalog_definition(options(), catalog_name(), definition_name()) ->
+-spec catalog_table_name(catalog_name()) -> catalog_table_name().
+catalog_table_name(Name) ->
+  jsv_catalog_registry:table_name(Name).
+
+-spec install_catalog(catalog_name(), catalog()) -> catalog_table_name().
+install_catalog(Name, Catalog) ->
+  jsv_catalog_registry:install_catalog(Name, Catalog).
+
+-spec find_catalog_definition(catalog_name(), definition_name()) ->
         {ok, definition()} | {error, catalog_definition_error_reason()}.
-find_catalog_definition(Options, CatalogName, DefinitionName) ->
-  Catalogs = maps:get(catalogs, Options, #{}),
-  case maps:find(CatalogName, Catalogs) of
-    {ok, Catalog} ->
-      case maps:find(DefinitionName, Catalog) of
-        {ok, Definition} ->
+find_catalog_definition(CatalogName, DefinitionName) ->
+  TableName = catalog_table_name(CatalogName),
+  case ets:whereis(TableName) of
+    undefined ->
+      {error, {unknown_catalog, CatalogName}};
+    TableRef ->
+      case ets:lookup(TableRef, DefinitionName) of
+        [{_, Definition}] ->
           {ok, Definition};
-        error ->
+        [] ->
           {error, {unknown_definition, CatalogName, DefinitionName}}
-      end;
-    error ->
-      {error, {unknown_catalog, CatalogName}}
+      end
   end.
 
 -spec is_keyword(json:value()) -> boolean().

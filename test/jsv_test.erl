@@ -328,24 +328,24 @@ validate_datetime_test_() ->
                                                    {12, 0, 0}}}}))].
 
 validate_catalogs_test_() ->
-  [?_assertError({invalid_definition, [{unknown_catalog, a}]},
-                 jsv:validate(42, {ref, a, b})),
-   ?_assertError({invalid_definition, [{unknown_definition, a, b}]},
-                 jsv:validate(42, {ref, a, b},
-                              #{catalogs => #{a => #{}}})),
-   ?_assertEqual(ok, jsv:validate(42, {ref, a, b},
-                                  #{catalogs => #{a => #{b => integer}}})),
-   ?_assertMatch({error, _},
-                 jsv:validate(42, {ref, a, b},
-                              #{catalogs => #{a => #{b => string}}})),
-   ?_assertError({invalid_definition, [{unknown_definition, a, c}]},
-                 jsv:validate(42, {ref, a, b},
-                              #{catalogs => #{a => #{b => {ref, c}}}})),
-   ?_assertError({invalid_definition, [{unknown_definition, a, d}]},
-                 jsv:validate(42, {ref, a, b},
-                              #{catalogs => #{a => #{b => {ref, c},
-                                                     c => {ref, d}}}})),
-   ?_assertEqual(ok, jsv:validate(42, {ref, a, b},
-                                  #{catalogs => #{a => #{b => {ref, c},
-                                                         c => {ref, d},
-                                                         d => integer}}}))].
+  {setup,
+   fun () ->
+       Catalog = #{a => integer,
+                   b => {ref, c},
+                   c => integer,
+                   d => {ref, z}},
+       jsv_catalog_registry:start_link(),
+       jsv:install_catalog(test, Catalog)
+   end,
+   fun (_) ->
+       ok
+   end,
+   [?_assertError({invalid_definition, [{unknown_catalog, test2}]},
+                  jsv:validate(42, {ref, test2, a})),
+    ?_assertError({invalid_definition, [{unknown_definition, test, foo}]},
+                  jsv:validate(42, {ref, test, foo})),
+    ?_assertEqual(ok, jsv:validate(42, {ref, test, a})),
+    ?_assertMatch({error, _}, jsv:validate(<<"hello">>, {ref, test, a})),
+    ?_assertError({invalid_definition, [{unknown_definition, test, z}]},
+                  jsv:validate(42, {ref, test, d})),
+    ?_assertEqual(ok, jsv:validate(42, {ref, test, b}))]}.

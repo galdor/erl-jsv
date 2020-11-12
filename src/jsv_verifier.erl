@@ -38,7 +38,7 @@ verify(State = #{definition := {ref, DefinitionName}}) ->
   end;
 verify(State = #{options := Options,
                  definition := {ref, Catalog, DefinitionName}}) ->
-  case jsv:find_catalog_definition(Options, Catalog, DefinitionName) of
+  case jsv:find_catalog_definition(Catalog, DefinitionName) of
     {ok, Definition} ->
       verify(State#{definition => Definition, catalog => Catalog});
     {error, Reason} ->

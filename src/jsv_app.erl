@@ -12,16 +12,14 @@
 %% OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 %% PERFORMANCE OF THIS SOFTWARE.
 
-{application, jsv,
- [{description, "Structural validation for JSON data."},
-  {vsn, "1.1.0"},
-  {registered, []},
-  {mod, {jsv_app, []}},
-  {applications,
-   [kernel,
-    stdlib,
-    json]},
-  {env, []},
-  {modules, []},
+-module(jsv_app).
 
-  {licenses, ["ISC"]}]}.
+-behaviour(application).
+
+-export([start/2, stop/1]).
+
+start(_StartType, _Args) ->
+  jsv_sup:start_link().
+
+stop(_State) ->
+  ok.

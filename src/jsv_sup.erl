@@ -12,16 +12,20 @@
 %% OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 %% PERFORMANCE OF THIS SOFTWARE.
 
-{application, jsv,
- [{description, "Structural validation for JSON data."},
-  {vsn, "1.1.0"},
-  {registered, []},
-  {mod, {jsv_app, []}},
-  {applications,
-   [kernel,
-    stdlib,
-    json]},
-  {env, []},
-  {modules, []},
+-module(jsv_sup).
 
-  {licenses, ["ISC"]}]}.
+-behaviour(supervisor).
+
+-export([start_link/0]).
+-export([init/1]).
+
+start_link() ->
+  supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+
+init([]) ->
+  Children = [#{id => clients,
+                start => {jsv_catalog_registry, start_link, []}}],
+  Flags = #{strategy => one_for_one,
+            intensity => 1,
+            period => 5},
+  {ok, {Flags, Children}}.
