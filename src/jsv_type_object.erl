@@ -28,7 +28,7 @@
                     | {members, #{jsv:keyword() := jsv:definition()}}.
 
 verify_constraint({value_type, Definition}, State) ->
-  jsv:verify_definition(Definition, State);
+  jsv_verifier:verify(State#{definition := Definition});
 
 verify_constraint({min_size, Min}, _) when is_integer(Min), Min >= 0 ->
   ok;
@@ -54,7 +54,7 @@ verify_constraint({members, Definitions}, State) when is_map(Definitions) ->
   case lists:all(fun jsv:is_keyword/1, maps:keys(Definitions)) of
     true ->
       F = fun (_, Definition, Errors) ->
-              case jsv:verify_definition(Definition, State) of
+              case jsv_verifier:verify(State#{definition := Definition}) of
                 ok ->
                   Errors;
                 {error, Errors2} ->
