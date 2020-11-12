@@ -36,8 +36,7 @@ verify(State = #{definition := {ref, DefinitionName}}) ->
     error ->
       {error, [no_current_catalog]}
   end;
-verify(State = #{options := Options,
-                 definition := {ref, Catalog, DefinitionName}}) ->
+verify(State = #{definition := {ref, Catalog, DefinitionName}}) ->
   case jsv:find_catalog_definition(Catalog, DefinitionName) of
     {ok, Definition} ->
       verify(State#{definition => Definition, catalog => Catalog});

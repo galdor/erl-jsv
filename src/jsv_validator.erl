@@ -38,8 +38,7 @@ init(Value, Definition, Options) ->
         ok | {error, [jsv:value_error()]}.
 validate(State = #{definition := TypeName}) when is_atom(TypeName) ->
   validate(State#{definition => {TypeName, #{}}});
-validate(State = #{options := Options,
-                   definition := {ref, Catalog, DefinitionName}}) ->
+validate(State = #{definition := {ref, Catalog, DefinitionName}}) ->
   {ok, Definition} = jsv:find_catalog_definition(Catalog, DefinitionName),
   validate(State#{definition => Definition,
                   catalog => Catalog});
