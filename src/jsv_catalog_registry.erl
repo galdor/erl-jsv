@@ -18,7 +18,7 @@
 
 -behaviour(gen_server).
 
--export([table_name/1, start_link/0, install_catalog/2]).
+-export([table_name/1, start_link/0, install_catalog/2, uninstall_catalog/1]).
 -export([init/1, terminate/2, handle_call/3, handle_cast/2, handle_info/2]).
 
 -type state() :: #{}.
@@ -38,6 +38,10 @@ start_link() ->
 install_catalog(Name, Catalog) ->
   gen_server:call(?MODULE, {install_catalog, Name, Catalog}).
 
+-spec uninstall_catalog(jsv:catalog_name()) -> ok.
+uninstall_catalog(Name) ->
+  gen_server:call(?MODULE, {uninstall_catalog, Name}).
+
 -spec init(list()) -> {ok, state()}.
 init([]) ->
   logger:update_process_metadata(#{domain => [jsv, catalog_registry]}),
@@ -50,6 +54,10 @@ terminate(_Reason, _State) ->
 handle_call({install_catalog, Name, Catalog}, _From, State) ->
   TableName = do_install_catalog(Name, Catalog),
   {reply, TableName, State};
+
+handle_call({uninstall_catalog, Name}, _From, State) ->
+  ok = do_uninstall_catalog(Name),
+  {reply, ok, State};
 
 handle_call(Msg, From, State) ->
   ?LOG_WARNING("unhandled call ~p from ~p", [Msg, From]),
@@ -74,3 +82,9 @@ do_install_catalog(Name, Catalog) ->
                     ets:insert(TableName, Pair)
                 end, maps:to_list(Catalog)),
   Name.
+
+-spec do_uninstall_catalog(jsv:catalog_name()) -> ok.
+do_uninstall_catalog(Name) ->
+  TableName = table_name(Name),
+  ets:delete(TableName),
+  ok.
