@@ -14,7 +14,7 @@
 
 {application, jsv,
  [{description, "Structural validation for JSON data."},
-  {vsn, "1.1.0"},
+  {vsn, "git"},
   {registered, []},
   {mod, {jsv_app, []}},
   {applications,
