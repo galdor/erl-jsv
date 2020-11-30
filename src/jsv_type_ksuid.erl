@@ -16,15 +16,17 @@
 
 -behaviour(jsv_type).
 
--export([validate_type/1]).
+-export([validate_type/1, canonicalize/3]).
 
 validate_type(Value) when is_binary(Value) ->
-  RE = <<"^[0-9A-Za-z]{27}$">>,
-  case re:run(Value, RE, [caseless]) of
-    {match, _} ->
-      ok;
-    nomatch ->
+  case ksuid:parse(Value) of
+    {ok, Id} ->
+      {ok, Id};
+    {error, _} ->
       error
   end;
 validate_type(_) ->
   error.
+
+canonicalize(_, CData, _) ->
+  CData.

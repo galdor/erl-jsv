@@ -163,4 +163,3 @@ validate_constraint(Value, {members, Definitions}, CData, State) ->
 
 canonicalize(_, CData, _) ->
   CData.
-

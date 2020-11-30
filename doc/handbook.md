@@ -202,6 +202,7 @@ Values are canonicalized as follows:
 - Datetime values: the canonical form is an Erlang value of type
   `calendar:datetime()`. Example: `"2010-08-01T14:45:00+01:00"` is
   canonicalized to `{{2010, 8, 1}, {13, 45, 0}}`.
+- UUID and KSUID values: the canonical form is the binary representation.
 - Arrays: the canonical form is an Erlang list containing the canonical form
   of each element of the array.
 - Objects: the canonical form is an Erlang map. For each member:

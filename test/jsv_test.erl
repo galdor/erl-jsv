@@ -310,10 +310,12 @@ validate_object_test_() ->
                                            #{<<"a">> => date}}}))].
 
 validate_uuid_test_() ->
-  [?_assertMatch({ok, _},
+  [?_assertEqual({ok, <<202,180,203,128,76,102,78,212,
+                        178,72,123,82,146,81,48,241>>},
                  jsv:validate(<<"cab4cb80-4c66-4ed4-b248-7b52925130f1">>,
                               uuid)),
-   ?_assertMatch({ok, _},
+   ?_assertEqual({ok, <<202,180,203,128,76,102,78,212,
+                        178,72,123,82,146,81,48,241>>},
                  jsv:validate(<<"CAB4CB80-4C66-4ED4-B248-7B52925130F1">>,
                               uuid)),
    ?_assertMatch({error, _},
@@ -328,7 +330,8 @@ validate_uuid_test_() ->
                               uuid))].
 
 validate_ksuid_test_() ->
-  [?_assertMatch({ok, _},
+  [?_assertEqual({ok, <<12,82,128,75,71,147,174,197,23,89,
+                        92,204,19,179,193,163,224,217,70,63>>},
                  jsv:validate(<<"1l0UE6izCgIw533MOupkAowglGJ">>, ksuid)),
    ?_assertMatch({error, _},
                  jsv:validate(<<"">>, ksuid)),
