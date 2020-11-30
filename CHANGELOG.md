@@ -6,6 +6,8 @@
 - Use keywords for member names in object constraints.
 - Add a `values` constraint for strings.
 - Introduce definition catalogs.
+- Introduce the idea of canonical version. `jsv:validate/2` and
+  `jsv:validate/3` now return `{ok, CanonicalValue}` on success.
 ## Misc
 - Rename the `element_type` constraint to `element`.
 

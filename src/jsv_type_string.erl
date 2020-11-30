@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/3]).
+         validate_type/1, validate_constraint/4]).
 
 -export_type([constraint/0]).
 
@@ -88,16 +88,16 @@ validate_type(Value) when is_binary(Value) ->
 validate_type(_) ->
   error.
 
-validate_constraint(Value, {min_length, Min}, _) ->
+validate_constraint(Value, {min_length, Min}, _, _) ->
   string_length(Value) >= Min;
 
-validate_constraint(Value, {max_length, Max}, _) ->
+validate_constraint(Value, {max_length, Max}, _, _) ->
   string_length(Value) =< Max;
 
-validate_constraint(Value, {prefix, Prefix}, _) when
+validate_constraint(Value, {prefix, Prefix}, _, _) when
     byte_size(Value) < byte_size(Prefix) ->
   invalid;
-validate_constraint(Value, {prefix, Prefix}, _) ->
+validate_constraint(Value, {prefix, Prefix}, _, _) ->
   case binary_part(Value, {0, byte_size(Prefix)}) of
     Prefix ->
       ok;
@@ -105,10 +105,10 @@ validate_constraint(Value, {prefix, Prefix}, _) ->
       invalid
   end;
 
-validate_constraint(Value, {suffix, Suffix}, _) when
+validate_constraint(Value, {suffix, Suffix}, _, _) when
     byte_size(Value) < byte_size(Suffix) ->
   invalid;
-validate_constraint(Value, {suffix, Suffix}, _) ->
+validate_constraint(Value, {suffix, Suffix}, _, _) ->
   case binary_part(Value, {byte_size(Value), -byte_size(Suffix)}) of
     Suffix ->
       ok;
@@ -116,7 +116,7 @@ validate_constraint(Value, {suffix, Suffix}, _) ->
       invalid
   end;
 
-validate_constraint(Value, {values, Keywords}, _) ->
+validate_constraint(Value, {values, Keywords}, _, _) ->
   F = fun (K) -> jsv:keyword_equal(K, Value) end,
   case lists:any(F, Keywords) of
     true ->

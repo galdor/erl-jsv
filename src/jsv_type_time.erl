@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/3,
+         validate_type/1, validate_constraint/4, canonicalize/3,
          format_time/1, is_valid_time/1]).
 
 -export_type([constraint/0]).
@@ -53,11 +53,14 @@ validate_type(Value) when is_binary(Value) ->
 validate_type(_) ->
   error.
 
-validate_constraint(Value, {min, Min}, _) ->
-  is_time_after(Value, Min);
+validate_constraint(_, {min, Min}, Time, _) ->
+  is_time_after(Time, Min);
 
-validate_constraint(Value, {max, Max}, _) ->
-  is_time_before(Value, Max).
+validate_constraint(_, {max, Max}, Time, _) ->
+  is_time_before(Time, Max).
+
+canonicalize(_, Time, _) ->
+  Time.
 
 -spec parse_time(binary()) -> {ok, calendar:time()} | error.
 parse_time(Value) ->

@@ -181,6 +181,33 @@ Constraints:
 ## Writing new types
 **TODO**
 
+# Canonical values
+Validation functions return a canonical version of the input value. Canonical
+versions are easier to work in Erlang with, and having them remove the need
+for lots of the usual data massaging steps.
+
+Values are canonicalized as follows:
+
+- Date values: the canonical form is an Erlang value of type
+  `calendar:date()`. Example: `"2010-08-01"` is canonicalized to `{2010, 8,
+  1}`.
+- Time values: the canonical form is an Erlang value of type
+  `calendar:time()`. Example: `"20:10:30"` is canonicalized to `{20, 10, 30}`.
+- Datetime values: the canonical form is an Erlang value of type
+  `calendar:datetime()`. Example: `"2010-08-01T14:45:00+01:00"` is
+  canonicalized to `{{2010, 8, 1}, {13, 45, 0}}`.
+- Arrays: the canonical form is an Erlang list containing the canonical form
+  of each element of the array.
+- Objects: the canonical form is an Erlang map. For each member:
+  - If the key is part of the set of keys defined by a `members` constraint,
+    it is converted to an atom; if not, it is converted to a binary.
+  - If the definition contains a `value_type` constraint or if the key is part
+    of the set of keys defined by a `members` constraint, the value is
+    converted to its canonical version; if not, it is unaffected by
+    canonicalization.
+
+Other values are unaffected by canonicalization.
+
 # Errors
 Validation errors are reported as maps containing information about the
 precise value being incorrect and its location as a [JSON
@@ -220,6 +247,9 @@ disabled with the `disable_verification` option. Note that invalid definitions
 can cause obscure errors; definitions should always be verified, either
 automatically by validation functions or separately by calling
 `jsv:verify_definition/2`.
+
+If validation succeeds, these functions return `{ok, CanonicalValue}` where
+`CanonicalValue` is the canonized version of the value passed in input.
 
 ### Options
 For `jsv:validate/3`, the following options are available:

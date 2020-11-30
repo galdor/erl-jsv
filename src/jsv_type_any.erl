@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/3]).
+         validate_type/1, validate_constraint/4]).
 
 -export_type([constraint/0]).
 
@@ -34,5 +34,5 @@ format_constraint_violation({value, ExpectedValue}, _) ->
 validate_type(_) ->
   ok.
 
-validate_constraint(Value, {value, ExpectedValue}, _) ->
+validate_constraint(Value, {value, ExpectedValue}, _, _) ->
   Value == ExpectedValue.

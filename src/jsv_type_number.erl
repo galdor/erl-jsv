@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/3]).
+         validate_type/1, validate_constraint/4]).
 
 -export_type([constraint/0]).
 
@@ -46,8 +46,8 @@ validate_type(Value) when is_number(Value) ->
 validate_type(_) ->
   error.
 
-validate_constraint(Value, {min, Min}, _) ->
+validate_constraint(Value, {min, Min}, _, _) ->
   Value >= Min;
 
-validate_constraint(Value, {max, Max}, _) ->
+validate_constraint(Value, {max, Max}, _, _) ->
   Value =< Max.

@@ -94,7 +94,7 @@ validate(Value, Definition) ->
   validate(Value, Definition, #{}).
 
 -spec validate(json:value(), definition(), options()) ->
-        ok | {error, [value_error()]}.
+        {ok, json:value()} | {error, [value_error()]}.
 validate(Value, Definition, Options) ->
   case maps:get(disable_verification, Options, false) of
     true ->
@@ -109,8 +109,8 @@ validate(Value, Definition, Options) ->
   end,
   State = jsv_validator:init(Value, Definition, Options),
   case jsv_validator:validate(State) of
-    ok ->
-      ok;
+    {ok, CanonicalValue} ->
+      {ok, CanonicalValue};
     {error, Errors} ->
       Errors2 = lists:reverse(Errors),
       Errors3 = case maps:get(format_value_errors, Options, false) of

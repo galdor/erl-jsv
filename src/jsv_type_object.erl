@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/3]).
+         validate_type/1, validate_constraint/4, canonicalize/3]).
 
 -export_type([constraint/0]).
 
@@ -89,31 +89,36 @@ format_constraint_violation({required, _}, {missing_names, Names}) ->
   {"value must contain the following members: ~ts", [iolist_to_binary(Data)]}.
 
 validate_type(Value) when is_map(Value) ->
-  ok;
+  {ok, Value};
 validate_type(_) ->
   error.
 
-validate_constraint(Value, {value_type, ValueType}, State) ->
-  F = fun (MemberName, MemberValue, Errors) ->
+validate_constraint(Value, {value_type, ValueType}, CData, State) ->
+  F = fun (MemberName, MemberValue, {Errors, CData2}) ->
           case
             jsv_validator:validate_child(MemberValue, ValueType, MemberName,
                                          State)
           of
-            ok ->
-              Errors;
+            {ok, ValueCData} ->
+              {Errors, CData2#{MemberName => ValueCData}};
             {error, Errors2} ->
-              Errors2 ++ Errors
+              {Errors2 ++ Errors, CData2}
           end
       end,
-  maps:fold(F, [], Value);
+  case maps:fold(F, {[], CData}, Value) of
+    {[], CData3} ->
+      {ok, CData3};
+    {Errors, _} ->
+      Errors
+  end;
 
-validate_constraint(Value, {min_size, Min}, _) ->
+validate_constraint(Value, {min_size, Min}, _, _) ->
   map_size(Value) >= Min;
 
-validate_constraint(Value, {max_size, Max}, _) ->
+validate_constraint(Value, {max_size, Max}, _, _) ->
   map_size(Value) =< Max;
 
-validate_constraint(Value, {required, Names}, _) ->
+validate_constraint(Value, {required, Names}, _, _) ->
   F = fun (Name0, MissingNames) ->
           Name = jsv:keyword_value(Name0),
           case maps:is_key(Name, Value) of
@@ -130,8 +135,8 @@ validate_constraint(Value, {required, Names}, _) ->
       {invalid, {missing_names, lists:reverse(MissingNames)}}
   end;
 
-validate_constraint(Value, {members, Definitions}, State) ->
-  F = fun (MemberName0, Definition, Errors) ->
+validate_constraint(Value, {members, Definitions}, CData, State) ->
+  F = fun (MemberName0, Definition, {Errors, CData2}) ->
           MemberName = jsv:keyword_value(MemberName0),
           case maps:find(MemberName, Value) of
             {ok, MemberValue} ->
@@ -139,13 +144,23 @@ validate_constraint(Value, {members, Definitions}, State) ->
                 jsv_validator:validate_child(MemberValue, Definition,
                                              MemberName, State)
               of
-                ok ->
-                  Errors;
+                {ok, ValueCData} ->
+                  CData3 = maps:remove(MemberName, CData2),
+                  {Errors, CData3#{binary_to_atom(MemberName) => ValueCData}};
                 {error, Errors2} ->
-                  Errors2 ++ Errors
+                  {Errors2 ++ Errors, CData2}
               end;
             error ->
-              Errors
+              {Errors, CData2}
           end
       end,
-  maps:fold(F, [], Definitions).
+  case maps:fold(F, {[], CData}, Definitions) of
+    {[], CData4} ->
+      {ok, CData4};
+    {Errors, _} ->
+      Errors
+  end.
+
+canonicalize(_, CData, _) ->
+  CData.
+

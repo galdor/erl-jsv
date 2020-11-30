@@ -16,7 +16,7 @@
 
 -export([init/3, validate/1, validate_child/4]).
 
--export_type([state/0]).
+-export_type([state/0, canonicalization_data/0]).
 
 -opaque state() :: #{options := jsv:options(),
                      value := json:value(),
@@ -24,6 +24,8 @@
                      definition := jsv:definition(),
                      type_map := jsv:type_map(),
                      catalog => jsv:catalog_name()}.
+
+-type canonicalization_data() :: term().
 
 -spec init(json:value(), jsv:definition(), jsv:options()) -> state().
 init(Value, Definition, Options) ->
@@ -35,7 +37,7 @@ init(Value, Definition, Options) ->
     type_map => TypeMap}.
 
 -spec validate(state()) ->
-        ok | {error, [jsv:value_error()]}.
+        {ok, json:value()} | {error, [jsv:value_error()]}.
 validate(State = #{definition := TypeName}) when is_atom(TypeName) ->
   validate(State#{definition => {TypeName, #{}}});
 validate(State = #{definition := {ref, Catalog, DefinitionName}}) ->
@@ -53,46 +55,69 @@ validate(State = #{value := Value,
                    definition := {Type, _},
                    type_map := TypeMap}) ->
   Module = maps:get(Type, TypeMap),
+  ValidateValue = fun (InputValue, CData) ->
+                      case
+                        validate_constraints(InputValue, Module, CData, State)
+                      of
+                        {ok, CData2} ->
+                          {ok, canonicalize(Module, Value, CData2, State)};
+                        {error, Errors} ->
+                          {error, Errors}
+                      end
+                  end,
   case Module:validate_type(Value) of
     ok ->
-      validate_constraints(Value, Module, State);
-    {ok, InterpretedValue} ->
-      validate_constraints(InterpretedValue, Module, State);
+      ValidateValue(Value, undefined);
+    {ok, CData} ->
+      ValidateValue(Value, CData);
     error ->
       {error, [value_error(State, {invalid_type, Type})]}
   end.
 
--spec validate_constraints(json:value(), module(), state()) ->
-        ok | {error, [jsv:value_error()]}.
-validate_constraints(Value, Module,
+-spec canonicalize(module(), json:value(),
+                   jsv_validator:canonicalization_data(),
+                   jsv_validator:state()) -> term().
+canonicalize(Module, Value, CData, State) ->
+  case lists:member({canonicalize, 3}, Module:module_info(exports)) of
+    true ->
+      Module:canonicalize(Value, CData, State);
+    false ->
+      Value
+  end.
+
+-spec validate_constraints(json:value(), module(), canonicalization_data(),
+                           state()) ->
+        {ok, canonicalization_data()} | {error, [jsv:value_error()]}.
+validate_constraints(Value, Module, CData,
                      State = #{definition := {Type, Constraints}}) ->
-  F = fun (ConstraintName, ConstraintValue, Errors) ->
+  F = fun (ConstraintName, ConstraintValue, {CData2, Errors}) ->
           Constraint = {ConstraintName, ConstraintValue},
-          case Module:validate_constraint(Value, Constraint, State) of
+          case Module:validate_constraint(Value, Constraint, CData2, State) of
+            {ok, CData3} ->
+              {CData3, Errors};
             Result when Result =:= ok; Result =:= true ->
-              Errors;
+              {CData2, Errors};
             Result when Result =:= invalid; Result =:= false ->
               Error = constraint_violation(State, Type, Constraint),
-              [Error | Errors];
+              {CData2, [Error | Errors]};
             {invalid, Details} ->
-              Error = constraint_violation(State, Type, Constraint,
-                                           Details),
-              [Error | Errors];
+              Error = constraint_violation(State, Type, Constraint, Details),
+              {CData2, [Error | Errors]};
             Errors2 when is_list(Errors2) ->
-              Errors2 ++ Errors
+              {CData2, Errors2 ++ Errors}
           end
       end,
-  case maps:fold(F, [], Constraints) of
-    [] ->
-      ok;
-    Errors ->
+  case maps:fold(F, {CData, []}, Constraints) of
+    {CData4, []} ->
+      {ok, CData4};
+    {_, Errors} ->
       {error, Errors}
   end.
 
 -spec validate_child(json:value(), jsv:definition(),
                      json_pointer:reference_token() | undefined,
                      jsv_validator:state()) ->
-        ok | {error, [jsv:value_error()]}.
+        {ok, json:value()} | {error, [jsv:value_error()]}.
 validate_child(Value, Definition, ChildPath,
                State = #{pointer := Pointer}) ->
   Pointer2 = case ChildPath of

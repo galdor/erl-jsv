@@ -15,21 +15,36 @@
 -module(jsv_type).
 
 -optional_callbacks([verify_constraint/2, format_constraint_violation/2,
-                     validate_constraint/3]).
+                     validate_constraint/4, canonicalize/3]).
 
 -callback verify_constraint(jsv:constraint(), jsv_verifier:state()) ->
-  ok | unknown | invalid | {invalid, term()} |
-  {error, [jsv:definition_error()]}.
+  Result when
+    Result :: ok
+            | unknown
+            | invalid
+            | {invalid, term()}
+            | {error, [jsv:definition_error()]}.
 
 -callback format_constraint_violation(jsv:constraint(),
                                       jsv:constraint_violation_details()) ->
   unicode:chardata() | {io:format(), [term()]}.
 
--callback validate_type(json:value()) ->
-  ok | {ok, InterpretedValue} | error when
-    InterpretedValue :: term().
+-callback validate_type(json:value()) -> Result when
+    Result :: ok
+            | {ok, jsv_validator:canonicalization_data()}
+            | error.
 
--callback validate_constraint(json:value() | InterpretedValue, jsv:constraint(),
-                              jsv_validator:state()) ->
-  ok | invalid | {invalid, term()} | boolean() | [jsv:definition_error()] when
-    InterpretedValue :: term().
+-callback validate_constraint(InputValue,
+                              jsv:constraint(),
+                              jsv_validator:canonicalization_data(),
+                              jsv_validator:state()) -> Result when
+    InputValue :: json:value() | jsv_validator:canonicalization_data(),
+    Result :: ok
+            | {ok, jsv_validator:canonicalization_data()}
+            | invalid
+            | {invalid, term()}
+            | boolean()
+            | [jsv:definition_error()].
+
+-callback canonicalize(json:value(), jsv_validator:canonicalization_data(),
+                       jsv_validator:state()) -> term().

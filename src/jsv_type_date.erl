@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/3,
+         validate_type/1, validate_constraint/4, canonicalize/3,
          format_date/1, is_valid_date/1]).
 
 -export_type([constraint/0]).
@@ -57,11 +57,14 @@ validate_type(Value) when is_binary(Value) ->
 validate_type(_) ->
   error.
 
-validate_constraint(Value, {min, Min}, _) ->
-  is_date_after(Value, Min);
+validate_constraint(_, {min, Min}, Date, _) ->
+  is_date_after(Date, Min);
 
-validate_constraint(Value, {max, Max}, _) ->
-  is_date_before(Value, Max).
+validate_constraint(_, {max, Max}, Date, _) ->
+  is_date_before(Date, Max).
+
+canonicalize(_, Date, _) ->
+  Date.
 
 -spec parse_date(binary()) -> {ok, calendar:date()} | error.
 parse_date(Value) ->
@@ -104,4 +107,3 @@ is_date_after(D1, D2) ->
 -spec is_date_before(calendar:date(), calendar:date()) -> boolean().
 is_date_before(D1, D2) ->
   calendar:date_to_gregorian_days(D1) =< calendar:date_to_gregorian_days(D2).
-

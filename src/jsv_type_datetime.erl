@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/3,
+         validate_type/1, validate_constraint/4, canonicalize/3,
          format_datetime/1, is_valid_datetime/1]).
 
 -export_type([constraint/0]).
@@ -59,11 +59,14 @@ validate_type(Value) when is_binary(Value) ->
 validate_type(_) ->
   error.
 
-validate_constraint(Value, {min, Min}, _) ->
-  is_datetime_after(Value, Min);
+validate_constraint(_, {min, Min}, SystemTime, _) ->
+  is_datetime_after(SystemTime, Min);
 
-validate_constraint(Value, {max, Max}, _) ->
-  is_datetime_before(Value, Max).
+validate_constraint(_, {max, Max}, SystemTime, _) ->
+  is_datetime_before(SystemTime, Max).
+
+canonicalize(_, SystemTime, _) ->
+  system_time_to_datetime(SystemTime).
 
 -spec format_datetime(calendar:datetime()) -> binary().
 format_datetime({Date, Time}) ->
@@ -82,6 +85,12 @@ datetime_to_system_time(DT) ->
   Seconds = calendar:datetime_to_gregorian_seconds(DT),
   Offset = calendar:datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}}),
   Seconds - Offset.
+
+-spec system_time_to_datetime(integer()) -> calendar:datetime().
+system_time_to_datetime(SystemTime) ->
+  Offset = calendar:datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}}),
+  Seconds = SystemTime + Offset,
+  calendar:gregorian_seconds_to_datetime(Seconds).
 
 -spec is_datetime_after(SystemTime :: integer(), calendar:datetime()) ->
         boolean().

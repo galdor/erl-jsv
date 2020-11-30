@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/3]).
+         validate_type/1, validate_constraint/4, canonicalize/3]).
 
 -export_type([constraint/0]).
 
@@ -45,26 +45,34 @@ format_constraint_violation({max_length, Max}, _) ->
   {"value must contain at most ~0tp elements", [Max]}.
 
 validate_type(Value) when is_list(Value) ->
-  ok;
+  {ok, []};
 validate_type(_) ->
   error.
 
-validate_constraint(Value, {element, ElementType}, State) ->
-  F = fun (I, Element, Errors) ->
+validate_constraint(Value, {element, ElementType}, CData, State) ->
+  F = fun (I, Element, {Errors, CData2}) ->
           case
             jsv_validator:validate_child(Element, ElementType,
                                          integer_to_binary(I), State)
           of
-            ok ->
-              Errors;
+            {ok, ElementCData} ->
+              {Errors, [ElementCData | CData2]};
             {error, Errors2} ->
-              Errors2 ++ Errors
+              {Errors2 ++ Errors, CData2}
           end
       end,
-  jsv_utils:fold_list_with_index(F, [], Value);
+  case jsv_utils:fold_list_with_index(F, {[], CData}, Value) of
+    {[], CData3} ->
+      {ok, CData3};
+    {Errors, _} ->
+      Errors
+  end;
 
-validate_constraint(Value, {min_length, Min}, _) ->
+validate_constraint(Value, {min_length, Min}, _, _) ->
   length(Value) >= Min;
 
-validate_constraint(Value, {max_length, Max}, _) ->
+validate_constraint(Value, {max_length, Max}, _, _) ->
   length(Value) =< Max.
+
+canonicalize(_, CData, _) ->
+  lists:reverse(CData).
