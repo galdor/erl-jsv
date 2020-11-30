@@ -123,7 +123,7 @@ Represents a JSON object.
 
 Constraints:
 
-- `value_type`: the definition that must apply to all member values.
+- `value`: the definition that must apply to all member values.
 - `min_size`: the minimal number of members in the object.
 - `max_size`: the maximum number of members in the object.
 - `required`: a list of member names the object must contain.
@@ -201,10 +201,9 @@ Values are canonicalized as follows:
 - Objects: the canonical form is an Erlang map. For each member:
   - If the key is part of the set of keys defined by a `members` constraint,
     it is converted to an atom; if not, it is converted to a binary.
-  - If the definition contains a `value_type` constraint or if the key is part
-    of the set of keys defined by a `members` constraint, the value is
-    converted to its canonical version; if not, it is unaffected by
-    canonicalization.
+  - If the definition contains a `value` constraint or if the key is part of
+    the set of keys defined by a `members` constraint, the value is converted
+    to its canonical version; if not, it is unaffected by canonicalization.
 
 Other values are unaffected by canonicalization.
 

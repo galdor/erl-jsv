@@ -21,13 +21,13 @@
 
 -export_type([constraint/0]).
 
--type constraint() :: {value_type, jsv:definition()}
+-type constraint() :: {value, jsv:definition()}
                     | {min_size, non_neg_integer()}
                     | {max_size, non_neg_integer()}
                     | {required, Names :: [jsv:keyword()]}
                     | {members, #{jsv:keyword() := jsv:definition()}}.
 
-verify_constraint({value_type, Definition}, State) ->
+verify_constraint({value, Definition}, State) ->
   jsv_verifier:verify(State#{definition := Definition});
 
 verify_constraint({min_size, Min}, _) when is_integer(Min), Min >= 0 ->
@@ -93,7 +93,7 @@ validate_type(Value) when is_map(Value) ->
 validate_type(_) ->
   error.
 
-validate_constraint(Value, {value_type, ValueType}, CData, State) ->
+validate_constraint(Value, {value, ValueType}, CData, State) ->
   F = fun (MemberName, MemberValue, {Errors, CData2}) ->
           case
             jsv_validator:validate_child(MemberValue, ValueType, MemberName,

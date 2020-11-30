@@ -10,6 +10,7 @@
   `jsv:validate/3` now return `{ok, CanonicalValue}` on success.
 ## Misc
 - Rename the `element_type` constraint to `element`.
+- Rename the `value_type` constraint to `value`.
 
 # 1.1.0
 ## Features
