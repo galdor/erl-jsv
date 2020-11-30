@@ -136,6 +136,12 @@ does not support any constraint.
 
 Example: `"21fba787-4471-422d-bc94-63521e1181da"`.
 
+### ksuid
+Represents a [KSUID](https://github.com/segmentio/ksuid) string. This type
+does not support any constraint.
+
+Example: `"1l0UE6izCgIw533MOupkAowglGJ"`.
+
 ### uri
 Represents a [URI](https://tools.ietf.org/html/rfc3986) string. This type
 does not support any constraint.

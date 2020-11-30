@@ -327,6 +327,16 @@ validate_uuid_test_() ->
                  jsv:validate(<<"cab4cb80-4c66-4ed4-b248-7b52925130f1-12">>,
                               uuid))].
 
+validate_ksuid_test_() ->
+  [?_assertMatch({ok, _},
+                 jsv:validate(<<"1l0UE6izCgIw533MOupkAowglGJ">>, ksuid)),
+   ?_assertMatch({error, _},
+                 jsv:validate(<<"">>, ksuid)),
+   ?_assertMatch({error, _},
+                 jsv:validate(<<"foobar">>, ksuid)),
+   ?_assertMatch({error, _},
+                 jsv:validate(<<"1l0UE6izCgIw533MOupkAowglG=">>, ksuid))].
+
 validate_uri_test_() ->
   [?_assertMatch({ok, _},
                  jsv:validate(<<"http://example.com">>, uri)),
