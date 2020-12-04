@@ -252,8 +252,12 @@ keyword_value(K) when is_binary(K) ->
 keyword_value(K) when is_atom(K) ->
   atom_to_binary(K);
 keyword_value(K) when is_list(K) ->
-  %% TODO error handling
-  unicode:characters_to_binary(K).
+  case unicode:characters_to_binary(K) of
+    Bin when is_binary(Bin) ->
+      Bin;
+    _ ->
+      error({invalid_string_data, K})
+  end.
 
 -spec keyword_equal(keyword(), keyword()) -> boolean().
 keyword_equal(K1, K2) when is_binary(K1), is_binary(K2) ->
