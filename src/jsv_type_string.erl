@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/4]).
+         validate_type/1, validate_constraint/4, canonicalize/3]).
 
 -export_type([constraint/0]).
 
@@ -84,7 +84,7 @@ format_constraint_violation({values, Keywords}, _) ->
   {"value must be one of the following strings: \"~ts\"", [Data]}.
 
 validate_type(Value) when is_binary(Value) ->
-  ok;
+  {ok, Value};
 validate_type(_) ->
   error.
 
@@ -120,10 +120,13 @@ validate_constraint(Value, {values, Keywords}, _, _) ->
   F = fun (K) -> jsv:keyword_equal(K, Value) end,
   case lists:any(F, Keywords) of
     true ->
-      ok;
+      {ok, binary_to_atom(Value)};
     false ->
       invalid
   end.
+
+canonicalize(_, CData, _) ->
+  CData.
 
 -spec string_length(binary()) -> non_neg_integer().
 string_length(Bin) ->

@@ -211,6 +211,8 @@ Values are canonicalized as follows:
   - If the definition contains a `value` constraint or if the key is part of
     the set of keys defined by a `members` constraint, the value is converted
     to its canonical version; if not, it is unaffected by canonicalization.
+- Strings: the canonical form is either a binary, or an atom if the value has
+  a `values` constraint.
 
 Other values are unaffected by canonicalization.
 
