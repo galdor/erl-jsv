@@ -37,7 +37,7 @@ init(Value, Definition, Options) ->
     type_map => TypeMap}.
 
 -spec validate(state()) ->
-        {ok, json:value()} | {error, [jsv:value_error()]}.
+        {ok, term()} | {error, [jsv:value_error()]}.
 validate(State = #{definition := TypeName}) when is_atom(TypeName) ->
   validate(State#{definition => {TypeName, #{}}});
 validate(State = #{definition := {ref, Catalog, DefinitionName}}) ->

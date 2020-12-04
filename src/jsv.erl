@@ -94,7 +94,7 @@ validate(Value, Definition) ->
   validate(Value, Definition, #{}).
 
 -spec validate(json:value(), definition(), options()) ->
-        {ok, json:value()} | {error, [value_error()]}.
+        {ok, term()} | {error, [value_error()]}.
 validate(Value, Definition, Options) ->
   case maps:get(disable_verification, Options, false) of
     true ->
