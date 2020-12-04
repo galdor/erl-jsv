@@ -18,7 +18,7 @@
 
 -behaviour(gen_server).
 
--export([table_name/1, start_link/0, install_catalog/2, uninstall_catalog/1]).
+-export([table_name/1, start_link/0, register_catalog/2, unregister_catalog/1]).
 -export([init/1, terminate/2, handle_call/3, handle_cast/2, handle_info/2]).
 
 -type state() :: #{}.
@@ -33,14 +33,14 @@ table_name(Name) ->
 start_link() ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
--spec install_catalog(jsv:catalog_name(), jsv:catalog()) ->
+-spec register_catalog(jsv:catalog_name(), jsv:catalog()) ->
         jsv:catalog_table_name().
-install_catalog(Name, Catalog) ->
-  gen_server:call(?MODULE, {install_catalog, Name, Catalog}).
+register_catalog(Name, Catalog) ->
+  gen_server:call(?MODULE, {register_catalog, Name, Catalog}).
 
--spec uninstall_catalog(jsv:catalog_name()) -> ok.
-uninstall_catalog(Name) ->
-  gen_server:call(?MODULE, {uninstall_catalog, Name}).
+-spec unregister_catalog(jsv:catalog_name()) -> ok.
+unregister_catalog(Name) ->
+  gen_server:call(?MODULE, {unregister_catalog, Name}).
 
 -spec init(list()) -> {ok, state()}.
 init([]) ->
@@ -51,12 +51,12 @@ init([]) ->
 terminate(_Reason, _State) ->
   ok.
 
-handle_call({install_catalog, Name, Catalog}, _From, State) ->
-  TableName = do_install_catalog(Name, Catalog),
+handle_call({register_catalog, Name, Catalog}, _From, State) ->
+  TableName = do_register_catalog(Name, Catalog),
   {reply, TableName, State};
 
-handle_call({uninstall_catalog, Name}, _From, State) ->
-  ok = do_uninstall_catalog(Name),
+handle_call({unregister_catalog, Name}, _From, State) ->
+  ok = do_unregister_catalog(Name),
   {reply, ok, State};
 
 handle_call(Msg, From, State) ->
@@ -71,9 +71,9 @@ handle_info(Msg, State) ->
   ?LOG_WARNING("unhandled info ~p", [Msg]),
   {noreply, State}.
 
--spec do_install_catalog(jsv:catalog_name(), jsv:catalog()) ->
+-spec do_register_catalog(jsv:catalog_name(), jsv:catalog()) ->
         jsv:catalog_table_name().
-do_install_catalog(Name, Catalog) ->
+do_register_catalog(Name, Catalog) ->
   TableName = table_name(Name),
   ets:new(TableName, [set,
                       named_table,
@@ -83,8 +83,8 @@ do_install_catalog(Name, Catalog) ->
                 end, maps:to_list(Catalog)),
   Name.
 
--spec do_uninstall_catalog(jsv:catalog_name()) -> ok.
-do_uninstall_catalog(Name) ->
+-spec do_unregister_catalog(jsv:catalog_name()) -> ok.
+do_unregister_catalog(Name) ->
   TableName = table_name(Name),
   ets:delete(TableName),
   ok.

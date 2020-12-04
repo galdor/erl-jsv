@@ -518,7 +518,7 @@ validate_catalogs_test_() ->
                    c => integer,
                    d => {ref, z}},
        jsv_catalog_registry:start_link(),
-       jsv:install_catalog(test, Catalog)
+       jsv:register_catalog(test, Catalog)
    end,
    fun (_) ->
        ok

@@ -20,7 +20,7 @@
          verify_definition/2,
          format_value_error/2, format_value_errors/2,
          type_map/1,
-         catalog_table_name/1, install_catalog/2, uninstall_catalog/1,
+         catalog_table_name/1, register_catalog/2, unregister_catalog/1,
          find_catalog_definition/2,
          is_keyword/1, keyword_value/1, keyword_equal/2]).
 
@@ -211,13 +211,13 @@ type_map(Options) ->
 catalog_table_name(Name) ->
   jsv_catalog_registry:table_name(Name).
 
--spec install_catalog(catalog_name(), catalog()) -> catalog_table_name().
-install_catalog(Name, Catalog) ->
-  jsv_catalog_registry:install_catalog(Name, Catalog).
+-spec register_catalog(catalog_name(), catalog()) -> catalog_table_name().
+register_catalog(Name, Catalog) ->
+  jsv_catalog_registry:register_catalog(Name, Catalog).
 
--spec uninstall_catalog(catalog_name()) -> ok.
-uninstall_catalog(Name) ->
-  jsv_catalog_registry:uninstall_catalog(Name).
+-spec unregister_catalog(catalog_name()) -> ok.
+unregister_catalog(Name) ->
+  jsv_catalog_registry:unregister_catalog(Name).
 
 -spec find_catalog_definition(catalog_name(), definition_name()) ->
         {ok, definition()} | {error, catalog_definition_error_reason()}.
