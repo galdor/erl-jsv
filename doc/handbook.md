@@ -267,3 +267,54 @@ For `jsv:validate/3`, the following options are available:
   values.
 - `disable_verification`: do not verify the definition before validation.
 - `catalogs`: a set of catalogs to use during verification and validation.
+
+## Generation
+The `jsv:generate/2` and `jsv:generate/3` functions generate JSON values from
+Erlang terms using a definition. This makes it easier to convert canonical
+representations to valid JSON strings.
+
+For example:
+```erlang
+Definition = {object, #{members => #{a => integer,
+                                     b => {string, #{values => [foo, bar]}},
+                                     c => ksuid,
+                                     d => date}}},
+jsv:generate(#{a => 2,
+               b => foo,
+               c => <<12,87,174,185,56,8,84,101,32,110,233,137,39,77,248,128,10,113,46,87>>,
+               d => {2020, 12, 4}}.
+```
+Returns:
+```erlang
+{ok, #{<<"a">> => 2,
+       <<"b">> => <<"foo">>,
+       <<"c">> => <<"1lBaURQi3YcGvvNkAD6vVrp6mGN">>,
+       <<"d">> => <<"2020-12-04">>}}
+```
+
+During generation, value are handled according to their definition type:
+- For type `any`, values are returned without any validation or conversion.
+- For types `boolean`, `null`, `number` and `integer`, values are type checked
+  and returned without any conversion.
+- For type `string`, values are type checked and converted to binaries. Atoms,
+  strings and binaries are accepted.
+- For type `array`, values are type checked and returned with each array
+  element generated using the `value` constraint if it exists, or the `any`
+  type if it does not.
+- For type `object`, values are type checked and returned with each key
+  converted to a binary (with atoms, strings and binaries accepted as input)
+  and each value generated using the corresponding `members` or `values`
+  constraint if they exist, or the `any` type if they do not.
+- For types `uuid` and `ksuid`, values are type checked, formatted and
+  converted to binaries.
+- For type `uri`, values are type checked and returned without any
+  conversion. Only binaries are accepted.
+- For types `time`, `date` and `datetime`, values are type checked, formatted,
+  and converted to binaries.
+
+Note that generation function only check types, not constraints, for two
+reasons:
+- It would be quite complex due to the multiple necessary type conversions.
+- The impact on performances would be significant. Paying this price to ensure
+  data are validated in input makes sense, but doing it for the output is not
+  as beneficial.

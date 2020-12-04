@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/4, canonicalize/3,
+         validate_type/1, validate_constraint/4, canonicalize/3, generate/2,
          format_time/1, is_valid_time/1]).
 
 -export_type([constraint/0]).
@@ -61,6 +61,14 @@ validate_constraint(_, {max, Max}, Time, _) ->
 
 canonicalize(_, Time, _) ->
   Time.
+
+generate(Time, _) ->
+  case is_valid_time(Time) of
+    true ->
+      {ok, format_time(Time)};
+    false ->
+      invalid
+  end.
 
 -spec parse_time(binary()) -> {ok, calendar:time()} | error.
 parse_time(Value) ->

@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/4]).
+         validate_type/1, validate_constraint/4, generate/2]).
 
 -export_type([constraint/0]).
 
@@ -51,3 +51,8 @@ validate_constraint(Value, {min, Min}, _, _) ->
 
 validate_constraint(Value, {max, Max}, _, _) ->
   Value =< Max.
+
+generate(Term, _) when is_number(Term) ->
+  {ok, Term};
+generate(_, _) ->
+  invalid.

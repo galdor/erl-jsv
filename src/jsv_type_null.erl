@@ -16,9 +16,14 @@
 
 -behaviour(jsv_type).
 
--export([validate_type/1]).
+-export([validate_type/1, generate/2]).
 
 validate_type(null) ->
   ok;
 validate_type(_) ->
   error.
+
+generate(null, _) ->
+  {ok, null};
+generate(_, _) ->
+  invalid.

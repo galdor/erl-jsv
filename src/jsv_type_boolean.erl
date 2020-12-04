@@ -16,9 +16,14 @@
 
 -behaviour(jsv_type).
 
--export([validate_type/1]).
+-export([validate_type/1, generate/2]).
 
 validate_type(Value) when is_boolean(Value) ->
   ok;
 validate_type(_) ->
   error.
+
+generate(Term, _) when is_boolean(Term) ->
+  {ok, Term};
+generate(_, _) ->
+  invalid.

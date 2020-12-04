@@ -17,7 +17,8 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/4, canonicalize/3]).
+         validate_type/1, validate_constraint/4, canonicalize/3,
+         generate/2]).
 
 -export_type([constraint/0]).
 
@@ -127,6 +128,20 @@ validate_constraint(Value, {values, Keywords}, _, _) ->
 
 canonicalize(_, CData, _) ->
   CData.
+
+generate(Term, _) when is_binary(Term) ->
+  {ok, Term};
+generate(Term, _) when is_list(Term) ->
+  case unicode:characters_to_binary(Term) of
+    Bin when is_binary(Bin) ->
+      {ok, Bin};
+    _ ->
+      invalid
+  end;
+generate(Term, _) when is_atom(Term) ->
+  {ok, atom_to_binary(Term)};
+generate(_, _) ->
+  invalid.
 
 -spec string_length(binary()) -> non_neg_integer().
 string_length(Bin) ->

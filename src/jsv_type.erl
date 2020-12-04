@@ -15,7 +15,8 @@
 -module(jsv_type).
 
 -optional_callbacks([verify_constraint/2, format_constraint_violation/2,
-                     validate_constraint/4, canonicalize/3]).
+                     validate_constraint/4, canonicalize/3,
+                     generate/2]).
 
 -callback verify_constraint(jsv:constraint(), jsv_verifier:state()) ->
   Result when
@@ -48,3 +49,8 @@
 
 -callback canonicalize(json:value(), jsv_validator:canonicalization_data(),
                        jsv_validator:state()) -> term().
+
+-callback generate(term(), jsv_validator:state()) -> Result when
+    Result :: {ok, json:value()}
+            | invalid
+            | {error, jsv:generation_error_reason()}.

@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/4, canonicalize/3,
+         validate_type/1, validate_constraint/4, canonicalize/3, generate/2,
          format_date/1, is_valid_date/1]).
 
 -export_type([constraint/0]).
@@ -65,6 +65,14 @@ validate_constraint(_, {max, Max}, Date, _) ->
 
 canonicalize(_, Date, _) ->
   Date.
+
+generate(Date, _) ->
+  case is_valid_date(Date) of
+    true ->
+      {ok, format_date(Date)};
+    false ->
+      invalid
+  end.
 
 -spec parse_date(binary()) -> {ok, calendar:date()} | error.
 parse_date(Value) ->

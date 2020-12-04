@@ -8,6 +8,8 @@
 - Introduce definition catalogs.
 - Introduce the idea of canonical version. `jsv:validate/2` and
   `jsv:validate/3` now return `{ok, CanonicalValue}` on success.
+- Introduce value generation, which creates valid JSON values from Erlang
+  terms according to a definition.
 - Add a type module for KSUID strings.
 ## Misc
 - Rename the `element_type` constraint to `element`.

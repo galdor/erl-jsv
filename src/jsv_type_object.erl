@@ -17,7 +17,8 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/4, canonicalize/3]).
+         validate_type/1, validate_constraint/4, canonicalize/3,
+         generate/2]).
 
 -export_type([constraint/0]).
 
@@ -163,3 +164,58 @@ validate_constraint(Value, {members, Definitions}, CData, State) ->
 
 canonicalize(_, CData, _) ->
   CData.
+
+generate(Term, State) when is_map(Term) ->
+  Definition = jsv_generator:state_definition(State),
+  F = fun (K, V, Acc) ->
+          MemberName = jsv:keyword_value(K),
+          case member_definition(MemberName, Definition) of
+            {ok, MemberDefinition} ->
+              case jsv_generator:generate_child(V, MemberDefinition, State) of
+                {ok, MemberValue} ->
+                  Acc#{MemberName => MemberValue};
+                {error, Reason} ->
+                  throw({error, Reason})
+              end;
+            error ->
+              Acc#{MemberName => V}
+          end
+      end,
+  try
+    {ok, maps:fold(F, #{}, Term)}
+  catch
+    throw:{error, Reason} ->
+      {error, Reason}
+  end;
+generate(_, _) ->
+  invalid.
+
+-spec member_definition(binary(), jsv:definition()) ->
+        {ok, jsv:definition()} | error.
+member_definition(Name, Definition) when is_atom(Definition) ->
+  member_definition(Name, {Definition, #{}});
+member_definition(Name, {_, #{members := Members}}) ->
+  %% This is quite bad, but keys of the members constraint can be binaries,
+  %% strings or atoms. Not much we can do here, unless we enforce binaries
+  %% which would make them annoying to type.
+  %%
+  %% If definitions had to be put in catalog registries, we could transform
+  %% them during registration, but they can also be provided directly.
+  Fun = fun F(It) ->
+            case maps:next(It) of
+              {Key, Definition, It2} ->
+                case jsv:keyword_equal(Key, Name) of
+                  true ->
+                    {ok, Definition};
+                  false ->
+                    F(It2)
+                end;
+              none ->
+                error
+            end
+        end,
+  Fun(maps:iterator(Members));
+member_definition(_Name, {_, #{value := Definition}}) ->
+  {ok, Definition};
+member_definition(_Name, _) ->
+  error.

@@ -116,7 +116,7 @@ validate_constraints(Value, Module, CData,
 
 -spec validate_child(json:value(), jsv:definition(),
                      json_pointer:reference_token() | undefined,
-                     jsv_validator:state()) ->
+                     state()) ->
         {ok, json:value()} | {error, [jsv:value_error()]}.
 validate_child(Value, Definition, ChildPath,
                State = #{pointer := Pointer}) ->

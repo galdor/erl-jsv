@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/4, canonicalize/3,
+         validate_type/1, validate_constraint/4, canonicalize/3, generate/2,
          format_datetime/1, is_valid_datetime/1]).
 
 -export_type([constraint/0]).
@@ -67,6 +67,14 @@ validate_constraint(_, {max, Max}, SystemTime, _) ->
 
 canonicalize(_, SystemTime, _) ->
   system_time_to_datetime(SystemTime).
+
+generate(Datetime, _) ->
+  case is_valid_datetime(Datetime) of
+    true ->
+      {ok, format_datetime(Datetime)};
+    false ->
+      invalid
+  end.
 
 -spec format_datetime(calendar:datetime()) -> binary().
 format_datetime({Date, Time}) ->

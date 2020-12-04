@@ -16,6 +16,7 @@
 
 -export([default_type_map/0,
          validate/2, validate/3,
+         generate/2, generate/3,
          verify_definition/2,
          format_value_error/2, format_value_errors/2,
          type_map/1,
@@ -24,8 +25,7 @@
          is_keyword/1, keyword_value/1, keyword_equal/2]).
 
 -export_type([definition/0, definition_name/0,
-              catalog/0, catalog_name/0, catalog_table/0,
-              catalog_table_name/0,
+              catalog/0, catalog_name/0, catalog_table_name/0,
               type/0, type_map/0,
               constraints/0, constraint/0,
               constraint_name/0, constraint_value/0,
@@ -33,6 +33,7 @@
               definition_error/0,
               value_error/0, value_error_reason/0,
               constraint_violation_details/0,
+              generation_error_reason/0,
               keyword/0]).
 
 -type definition() :: type()
@@ -44,7 +45,6 @@
 
 -type catalog() :: #{definition_name() := definition()}.
 -type catalog_name() :: atom().
--type catalog_table() :: #{catalog_name() := catalog()}.
 -type catalog_table_name() :: atom().
 
 -type type() :: atom().
@@ -84,6 +84,8 @@
 
 -type constraint_violation_details() :: undefined | term().
 
+-type generation_error_reason() :: {invalid_value, term(), jsv:type()}.
+
 %% Keywords are used in multiple types of constraints for literal JSON strings
 %% where having to type literal Erlang binaries would be painful. Object keys
 %% are the most obvious example.
@@ -121,6 +123,28 @@ validate(Value, Definition, Options) ->
                 end,
       {error, Errors3}
   end.
+
+-spec generate(term(), definition()) ->
+        {ok, json:value()} | {error, generation_error_reason()}.
+generate(Term, Definition) ->
+  generate(Term, Definition, #{}).
+
+-spec generate(term(), definition(), options()) ->
+        {ok, json:value()} | {error, generation_error_reason()}.
+generate(Term, Definition, Options) ->
+  case maps:get(disable_verification, Options, false) of
+    true ->
+      ok;
+    false ->
+      case verify_definition(Definition, Options) of
+        ok ->
+          ok;
+        {error, DefinitionErrors} ->
+          error({invalid_definition, DefinitionErrors})
+      end
+  end,
+  State = jsv_generator:init(Term, Definition, Options),
+  jsv_generator:generate(State).
 
 -spec verify_definition(definition(), options()) ->
         ok | {error, [definition_error()]}.
@@ -228,6 +252,7 @@ keyword_value(K) when is_binary(K) ->
 keyword_value(K) when is_atom(K) ->
   atom_to_binary(K);
 keyword_value(K) when is_list(K) ->
+  %% TODO error handling
   unicode:characters_to_binary(K).
 
 -spec keyword_equal(keyword(), keyword()) -> boolean().

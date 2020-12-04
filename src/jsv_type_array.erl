@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/4, canonicalize/3]).
+         validate_type/1, validate_constraint/4, canonicalize/3, generate/2]).
 
 -export_type([constraint/0]).
 
@@ -76,3 +76,29 @@ validate_constraint(Value, {max_length, Max}, _, _) ->
 
 canonicalize(_, CData, _) ->
   lists:reverse(CData).
+
+generate(Term, State) when is_list(Term) ->
+  {_, Constraints} = jsv_generator:state_definition(State),
+  case Constraints of
+    #{element := Definition} ->
+      F = fun (Element) ->
+              case
+                jsv_generator:generate_child(Element, Definition, State)
+              of
+                {ok, Value} ->
+                  Value;
+                {error, Reason} ->
+                  throw({error, Reason})
+              end
+          end,
+      try
+        {ok, lists:map(F, Term)}
+      catch
+        throw:{error, Reason} ->
+          {error, Reason}
+      end;
+    _ ->
+      {ok, Term}
+  end;
+generate(_, _) ->
+  invalid.
