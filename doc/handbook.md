@@ -282,7 +282,8 @@ Definition = {object, #{members => #{a => integer,
 jsv:generate(#{a => 2,
                b => foo,
                c => <<12,87,174,185,56,8,84,101,32,110,233,137,39,77,248,128,10,113,46,87>>,
-               d => {2020, 12, 4}}, Definition).
+               d => {2020, 12, 4}},
+             Definition).
 ```
 Returns:
 ```erlang
