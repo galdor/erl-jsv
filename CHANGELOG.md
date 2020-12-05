@@ -15,6 +15,7 @@
 ## Misc
 - Rename the `element_type` constraint to `element`.
 - Rename the `value_type` constraint to `value`.
+- Use the string representation for ksuids (erl-ksuid 1.1.x).
 
 # 1.1.0
 ## Features

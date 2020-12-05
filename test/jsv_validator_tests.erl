@@ -330,8 +330,7 @@ validate_uuid_test_() ->
                               uuid))].
 
 validate_ksuid_test_() ->
-  [?_assertEqual({ok, <<12,82,128,75,71,147,174,197,23,89,
-                        92,204,19,179,193,163,224,217,70,63>>},
+  [?_assertEqual({ok, <<"1l0UE6izCgIw533MOupkAowglGJ">>},
                  jsv:validate(<<"1l0UE6izCgIw533MOupkAowglGJ">>, ksuid)),
    ?_assertMatch({error, _},
                  jsv:validate(<<"">>, ksuid)),

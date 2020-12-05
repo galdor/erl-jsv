@@ -107,8 +107,7 @@ generate_uuid_test_() ->
 
 generate_ksuid_test_() ->
   [?_assertEqual({ok, <<"1lBXqnSQoSzv6kZpygOXoQVIyzi">>},
-                 jsv:generate(<<12,87,169,163,3,73,161,97,93,99,
-                                32,93,27,68,8,140,225,164,176,2>>, ksuid)),
+                 jsv:generate(<<"1lBXqnSQoSzv6kZpygOXoQVIyzi">>, ksuid)),
    ?_assertEqual({error, {invalid_value, <<"foo">>, ksuid}},
                  jsv:generate(<<"foo">>, ksuid))].
 
