@@ -351,6 +351,30 @@ validate_uri_test_() ->
    ?_assertMatch({error, _},
                  jsv:validate(<<"">>, uri))].
 
+validate_email_address_test_() ->
+  [?_assertMatch({ok, _},
+                 jsv:validate(<<"foo@example.com">>, email_address)),
+   ?_assertMatch({ok, _},
+                 jsv:validate(<<"foo+test@example.com">>, email_address)),
+   ?_assertMatch({ok, _},
+                 jsv:validate(<<"foo+test@example.com.">>, email_address)),
+   ?_assertMatch({ok, _},
+                 jsv:validate(<<"foo@com">>, email_address)),
+   ?_assertMatch({ok, _},
+                 jsv:validate(<<"foo@com.">>, email_address)),
+   ?_assertMatch({ok, _},
+                 jsv:validate(<<"foo@com.">>, email_address)),
+   ?_assertMatch({ok, _},
+                 jsv:validate(<<"foo@192.0.2.1">>, email_address)),
+   ?_assertMatch({error, _},
+                 jsv:validate(<<"foo">>, email_address)),
+   ?_assertMatch({error, _},
+                 jsv:validate(<<"foo@">>, email_address)),
+   ?_assertMatch({error, _},
+                 jsv:validate(<<"example.com">>, email_address)),
+   ?_assertMatch({error, _},
+                 jsv:validate(<<"@example.com">>, email_address))].
+
 validate_time_test_() ->
   [?_assertMatch({ok, {10, 20, 30}},
                  jsv:validate(<<"10:20:30">>, time)),

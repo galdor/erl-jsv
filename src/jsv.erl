@@ -199,6 +199,7 @@ default_type_map() ->
     uuid => jsv_type_uuid,
     ksuid => jsv_type_ksuid,
     uri => jsv_type_uri,
+    email_address => jsv_type_email_address,
     time => jsv_type_time,
     date => jsv_type_date,
     datetime => jsv_type_datetime}.

@@ -12,6 +12,7 @@
 - Introduce value generation, which creates valid JSON values from Erlang
   terms according to a definition.
 - Add a type module for KSUID strings.
+- Add a minimal `email_address` type.
 ## Misc
 - Rename the `element_type` constraint to `element`.
 - Rename the `value_type` constraint to `value`.
