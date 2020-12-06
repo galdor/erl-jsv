@@ -29,5 +29,5 @@ generate(Term, _) ->
     true ->
       {ok, Term};
     false ->
-      invalid
+      error
   end.

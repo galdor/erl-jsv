@@ -37,4 +37,4 @@ validate_type(_) ->
 generate(Term, _) when is_binary(Term) ->
   {ok, Term};
 generate(_, _) ->
-  invalid.
+  error.

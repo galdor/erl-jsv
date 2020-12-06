@@ -73,7 +73,7 @@ generate(Datetime, _) ->
     true ->
       {ok, format_datetime(Datetime)};
     false ->
-      invalid
+      error
   end.
 
 -spec format_datetime(calendar:datetime()) -> binary().

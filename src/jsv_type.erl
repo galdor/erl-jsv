@@ -52,5 +52,5 @@
 
 -callback generate(term(), jsv_validator:state()) -> Result when
     Result :: {ok, json:value()}
-            | invalid
+            | error
             | {error, jsv:generation_error_reason()}.

@@ -34,4 +34,4 @@ canonicalize(_, CData, _) ->
 generate(Term, _) when is_binary(Term), byte_size(Term) =:= 16 ->
   {ok, uuid:format(Term)};
 generate(_, _) ->
-  invalid.
+  error.

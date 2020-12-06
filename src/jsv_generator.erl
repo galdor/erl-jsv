@@ -56,7 +56,7 @@ generate(State = #{term := Term,
       case Module:generate(Term, State) of
         {ok, Value} ->
           {ok, Value};
-        invalid ->
+        error ->
           {error, {invalid_value, Term, Type}};
         {error, Reason} ->
           {error, Reason}

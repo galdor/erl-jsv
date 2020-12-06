@@ -26,4 +26,4 @@ validate_type(_) ->
 generate(null, _) ->
   {ok, null};
 generate(_, _) ->
-  invalid.
+  error.

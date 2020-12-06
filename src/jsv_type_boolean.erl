@@ -26,4 +26,4 @@ validate_type(_) ->
 generate(Term, _) when is_boolean(Term) ->
   {ok, Term};
 generate(_, _) ->
-  invalid.
+  error.

@@ -136,12 +136,12 @@ generate(Term, _) when is_list(Term) ->
     Bin when is_binary(Bin) ->
       {ok, Bin};
     _ ->
-      invalid
+      error
   end;
 generate(Term, _) when is_atom(Term) ->
   {ok, atom_to_binary(Term)};
 generate(_, _) ->
-  invalid.
+  error.
 
 -spec string_length(binary()) -> non_neg_integer().
 string_length(Bin) ->

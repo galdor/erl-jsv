@@ -55,4 +55,4 @@ validate_constraint(Value, {max, Max}, _, _) ->
 generate(Term, _) when is_number(Term) ->
   {ok, Term};
 generate(_, _) ->
-  invalid.
+  error.

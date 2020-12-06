@@ -56,4 +56,4 @@ validate_constraint(Value, {max, Max}, _, _) ->
 generate(Term, _) when is_integer(Term) ->
   {ok, Term};
 generate(_, _) ->
-  invalid.
+  error.

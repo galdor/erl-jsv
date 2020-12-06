@@ -101,4 +101,4 @@ generate(Term, State) when is_list(Term) ->
       {ok, Term}
   end;
 generate(_, _) ->
-  invalid.
+  error.

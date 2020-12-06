@@ -188,7 +188,7 @@ generate(Term, State) when is_map(Term) ->
       {error, Reason}
   end;
 generate(_, _) ->
-  invalid.
+  error.
 
 -spec member_definition(binary(), jsv:definition()) ->
         {ok, jsv:definition()} | error.

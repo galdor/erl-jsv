@@ -71,7 +71,7 @@ generate(Date, _) ->
     true ->
       {ok, format_date(Date)};
     false ->
-      invalid
+      error
   end.
 
 -spec parse_date(binary()) -> {ok, calendar:date()} | error.

@@ -67,7 +67,7 @@ generate(Time, _) ->
     true ->
       {ok, format_time(Time)};
     false ->
-      invalid
+      error
   end.
 
 -spec parse_time(binary()) -> {ok, calendar:time()} | error.
