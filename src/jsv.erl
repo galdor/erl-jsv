@@ -245,7 +245,9 @@ is_keyword(Value) when is_list(Value) ->
                true;
               (_) ->
                false
-           end, Value).
+           end, Value);
+is_keyword(_) ->
+  false.
 
 -spec keyword_value(keyword()) -> binary().
 keyword_value(K) when is_binary(K) ->

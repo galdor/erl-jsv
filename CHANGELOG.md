@@ -13,6 +13,8 @@
   terms according to a definition.
 - Add a type module for KSUID strings.
 - Add a minimal `email_address` type.
+## Bugs
+- Handle values which are not atoms/strings/binaries in `jsv:is_keyword/1`.
 ## Misc
 - Rename the `element_type` constraint to `element`.
 - Rename the `value_type` constraint to `value`.
