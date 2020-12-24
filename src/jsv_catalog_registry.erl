@@ -61,7 +61,7 @@ handle_call({unregister_catalog, Name}, _From, State) ->
 
 handle_call(Msg, From, State) ->
   ?LOG_WARNING("unhandled call ~p from ~p", [Msg, From]),
-  {noreply, State}.
+  {reply, unhandled, State}.
 
 handle_cast(Msg, State) ->
   ?LOG_WARNING("unhandled cast ~p", [Msg]),

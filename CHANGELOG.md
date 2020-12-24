@@ -15,6 +15,7 @@
 - Add a minimal `email_address` type.
 ## Bugs
 - Handle values which are not atoms/strings/binaries in `jsv:is_keyword/1`.
+- Fix handling of unknown `gen_server` calls.
 ## Misc
 - Rename the `element_type` constraint to `element`.
 - Rename the `value_type` constraint to `value`.
