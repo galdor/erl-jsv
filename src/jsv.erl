@@ -91,7 +91,8 @@
 %% are the most obvious example.
 -type keyword() :: binary() | string() | atom().
 
--spec validate(json:value(), definition()) -> ok | {error, [value_error()]}.
+-spec validate(json:value(), definition()) ->
+        {ok, term()} | {error, [value_error()]}.
 validate(Value, Definition) ->
   validate(Value, Definition, #{}).
 

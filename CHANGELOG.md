@@ -1,6 +1,8 @@
 % erl-jsv changelog
 
 # Next Version
+## Bugs
+- Fix the type signature of `jsv:validate/2`.
 
 # 1.2.0
 ## Features
