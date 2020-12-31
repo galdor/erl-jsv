@@ -3,6 +3,7 @@
 # Next Version
 ## Bugs
 - Fix the type signature of `jsv:validate/2`.
+- Delete catalog registry ETS tables on shutdown.
 
 # 1.2.0
 ## Features

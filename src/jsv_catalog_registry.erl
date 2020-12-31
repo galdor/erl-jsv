@@ -21,7 +21,7 @@
 -export([table_name/1, start_link/0, register_catalog/2, unregister_catalog/1]).
 -export([init/1, terminate/2, handle_call/3, handle_cast/2, handle_info/2]).
 
--type state() :: #{}.
+-type state() :: #{tables := #{jsv:catalog_name() := ets:tid()}}.
 
 -spec table_name(jsv:catalog_name()) -> jsv:catalog_table_name().
 table_name(Name) ->
@@ -45,19 +45,21 @@ unregister_catalog(Name) ->
 -spec init(list()) -> {ok, state()}.
 init([]) ->
   logger:update_process_metadata(#{domain => [jsv, catalog_registry]}),
-  State = #{},
+  State = #{tables => #{}},
   {ok, State}.
 
-terminate(_Reason, _State) ->
+terminate(_Reason, #{tables := Tables}) ->
+  lists:foreach(fun ({_, Id}) -> ets:delete(Id) end,
+                maps:to_list(Tables)),
   ok.
 
 handle_call({register_catalog, Name, Catalog}, _From, State) ->
-  TableName = do_register_catalog(Name, Catalog),
-  {reply, TableName, State};
+  {TableName, State2} = do_register_catalog(Name, Catalog, State),
+  {reply, TableName, State2};
 
 handle_call({unregister_catalog, Name}, _From, State) ->
-  ok = do_unregister_catalog(Name),
-  {reply, ok, State};
+  State2 = do_unregister_catalog(Name, State),
+  {reply, ok, State2};
 
 handle_call(Msg, From, State) ->
   ?LOG_WARNING("unhandled call ~p from ~p", [Msg, From]),
@@ -71,20 +73,20 @@ handle_info(Msg, State) ->
   ?LOG_WARNING("unhandled info ~p", [Msg]),
   {noreply, State}.
 
--spec do_register_catalog(jsv:catalog_name(), jsv:catalog()) ->
-        jsv:catalog_table_name().
-do_register_catalog(Name, Catalog) ->
+-spec do_register_catalog(jsv:catalog_name(), jsv:catalog(), state()) ->
+        {jsv:catalog_table_name(), state()}.
+do_register_catalog(Name, Catalog, State = #{tables := Tables}) ->
   TableName = table_name(Name),
-  ets:new(TableName, [set,
-                      named_table,
-                      {read_concurrency, true}]),
+  Id = ets:new(TableName, [set,
+                           named_table,
+                           {read_concurrency, true}]),
   lists:foreach(fun (Pair) ->
                     ets:insert(TableName, Pair)
                 end, maps:to_list(Catalog)),
-  Name.
+  {Name, State#{tables => Tables#{Name => Id}}}.
 
--spec do_unregister_catalog(jsv:catalog_name()) -> ok.
-do_unregister_catalog(Name) ->
+-spec do_unregister_catalog(jsv:catalog_name(), state()) -> state().
+do_unregister_catalog(Name, State = #{tables := Tables}) ->
   TableName = table_name(Name),
   ets:delete(TableName),
-  ok.
+  State#{tables => maps:remove(Name, Tables)}.
