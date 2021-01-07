@@ -167,7 +167,8 @@ verify_catalog(CatalogName, Options0) ->
       try
         verify_catalog_definition(Table, ets:first(Table), Options)
       after
-        ets:safe_fixtable(Table, false)
+        ets:safe_fixtable(Table, false),
+        ok
       end
   end.
 
