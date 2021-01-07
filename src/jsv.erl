@@ -151,8 +151,9 @@ generate(Term, Definition, Options) ->
   State = jsv_generator:init(Term, Definition, Options),
   jsv_generator:generate(State).
 
--spec verify_catalog(catalog_name(), options()) ->
-        ok | {error, [definition_error_reason()]}.
+-spec verify_catalog(catalog_name(), options()) -> ok | {error, Reason} when
+    Reason :: [definition_error_reason()]
+            | {unknown_catalog, catalog_name()}.
 verify_catalog(CatalogName, Options0) ->
   %% We need to set the current catalog since the definitions of the catalog
   %% may include reference to other definitions in the same catalog, and will
@@ -167,8 +168,7 @@ verify_catalog(CatalogName, Options0) ->
       try
         verify_catalog_definition(Table, ets:first(Table), Options)
       after
-        ets:safe_fixtable(Table, false),
-        ok
+        ets:safe_fixtable(Table, false)
       end
   end.
 
