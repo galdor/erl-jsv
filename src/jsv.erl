@@ -17,7 +17,7 @@
 -export([default_type_map/0,
          validate/2, validate/3,
          generate/2, generate/3,
-         verify_definition/2,
+         verify_catalog/2, verify_definition/2,
          format_value_error/2, format_value_errors/2,
          type_map/1,
          catalog_table_name/1, register_catalog/2, unregister_catalog/1,
@@ -57,7 +57,8 @@
 
 -type options() :: #{type_map => type_map(),
                      format_value_errors => boolean(),
-                     disable_verification => boolean()}.
+                     disable_verification => boolean(),
+                     catalog => catalog_name()}.
 
 -type definition_error_reason() ::
         {invalid_format, term()}
@@ -149,6 +150,39 @@ generate(Term, Definition, Options) ->
   end,
   State = jsv_generator:init(Term, Definition, Options),
   jsv_generator:generate(State).
+
+-spec verify_catalog(catalog_name(), options()) ->
+        ok | {error, [definition_error_reason()]}.
+verify_catalog(CatalogName, Options0) ->
+  %% We need to set the current catalog since the definitions of the catalog
+  %% may include reference to other definitions in the same catalog, and will
+  %% therefore use {ref, DefinitionName}.
+  Options = Options0#{catalog => CatalogName},
+  TableName = catalog_table_name(CatalogName),
+  case ets:whereis(TableName) of
+    undefined ->
+      {error, {unknown_catalog, CatalogName}};
+    Table ->
+      ets:safe_fixtable(Table, true),
+      try
+        verify_catalog_definition(Table, ets:first(Table), Options)
+      after
+        ets:safe_fixtable(Table, false)
+      end
+  end.
+
+-spec verify_catalog_definition(ets:tid(), Key :: term(), options()) ->
+        ok | {error, [definition_error_reason()]}.
+verify_catalog_definition(_Table, '$end_of_table', _Options) ->
+  ok;
+verify_catalog_definition(Table, Name, Options) ->
+  Definition = ets:lookup_element(Table, Name, 2),
+  case verify_definition(Definition, Options) of
+    ok ->
+      verify_catalog_definition(Table, ets:next(Table, Name), Options);
+    {error, Errors} ->
+      {error, {invalid_definition, Errors, Name}}
+  end.
 
 -spec verify_definition(definition(), options()) ->
         ok | {error, [definition_error_reason()]}.

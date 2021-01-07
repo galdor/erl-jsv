@@ -239,6 +239,9 @@ Definition = {array, #{element => {integer, #{min => 1}}}},
 jsv:verify_definition(Definition, jsv:default_type_map()).
 ```
 
+The `jsv:verify_catalog/2` function verifies all the definitions stored in a
+catalog.
+
 ## Validation
 The `jsv:validate/2` and `jsv:validate/3` functions validate a value against a
 definition.

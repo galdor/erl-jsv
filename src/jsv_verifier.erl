@@ -24,8 +24,14 @@
 
 -spec init(jsv:definition(), jsv:options()) -> state().
 init(Definition, Options) ->
-  #{options => Options,
-    definition => Definition}.
+  State = #{options => Options,
+            definition => Definition},
+  case maps:find(catalog, Options) of
+    {ok, Catalog} ->
+      State#{catalog => Catalog};
+    error ->
+      State
+  end.
 
 -spec verify(state()) -> ok | {error, [jsv:definition_error_reason()]}.
 verify(State = #{definition := TypeName}) when

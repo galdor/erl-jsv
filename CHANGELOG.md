@@ -1,6 +1,8 @@
 % erl-jsv changelog
 
 # Next Version
+## Features
+- Add `jsv:verify_catalog/1`.
 ## Bugs
 - Fix the type signature of `jsv:validate/2`.
 - Delete catalog registry ETS tables on shutdown.
