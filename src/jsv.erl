@@ -30,7 +30,7 @@
               constraints/0, constraint/0,
               constraint_name/0, constraint_value/0,
               options/0,
-              definition_error/0,
+              definition_error_reason/0,
               value_error/0, value_error_reason/0,
               constraint_violation_details/0,
               generation_error_reason/0,
@@ -59,23 +59,26 @@
                      format_value_errors => boolean(),
                      disable_verification => boolean()}.
 
--type definition_error() :: {invalid_format, term()}
-                          | {unknown_type, type()}
-                          | {unknown_constraint, jsv:type(), jsv:constraint()}
-                          | {invalid_constraint, jsv:type(),
-                             jsv:constraint(), term()}
-                          | catalog_definition_error_reason().
+-type definition_error_reason() ::
+        {invalid_format, term()}
+      | {unknown_type, type()}
+      | {unknown_constraint, jsv:type(), jsv:constraint()}
+      | {invalid_constraint, jsv:type(),
+         jsv:constraint(), term()}
+      | catalog_definition_error_reason().
 
--type value_error() :: #{reason := value_error_reason(),
-                         reason_string => binary(),
-                         value := json:value(),
-                         pointer := json_pointer:pointer(),
-                         pointer_string => binary()}.
+-type value_error() ::
+        #{reason := value_error_reason(),
+          reason_string => binary(),
+          value := json:value(),
+          pointer := json_pointer:pointer(),
+          pointer_string => binary()}.
 
--type value_error_reason() :: {invalid_type, ExpectedType :: jsv:type()}
-                            | {constraint_violation, jsv:type(), constraint()}
-                            | {constraint_violation, jsv:type(), constraint(),
-                               constraint_violation_details()}.
+-type value_error_reason() ::
+        {invalid_type, ExpectedType :: jsv:type()}
+      | {constraint_violation, jsv:type(), constraint()}
+      | {constraint_violation, jsv:type(), constraint(),
+         constraint_violation_details()}.
 
 -type catalog_definition_error_reason() ::
         {unknown_catalog, catalog_name()}
@@ -148,7 +151,7 @@ generate(Term, Definition, Options) ->
   jsv_generator:generate(State).
 
 -spec verify_definition(definition(), options()) ->
-        ok | {error, [definition_error()]}.
+        ok | {error, [definition_error_reason()]}.
 verify_definition(Definition, Options) ->
   State = jsv_verifier:init(Definition, Options),
   jsv_verifier:verify(State).

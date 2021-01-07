@@ -4,6 +4,8 @@
 ## Bugs
 - Fix the type signature of `jsv:validate/2`.
 - Delete catalog registry ETS tables on shutdown.
+## Misc
+- Rename the `jsv:definition_error/0` type to `jsv:definition_error_reason/0`.
 
 # 1.2.0
 ## Features

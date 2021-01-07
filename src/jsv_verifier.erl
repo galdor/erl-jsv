@@ -27,7 +27,7 @@ init(Definition, Options) ->
   #{options => Options,
     definition => Definition}.
 
--spec verify(state()) -> ok | {error, [jsv:definition_error()]}.
+-spec verify(state()) -> ok | {error, [jsv:definition_error_reason()]}.
 verify(State = #{definition := TypeName}) when
     is_atom(TypeName) ->
   verify(State#{definition => {TypeName, #{}}});

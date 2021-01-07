@@ -24,7 +24,7 @@
             | unknown
             | invalid
             | {invalid, term()}
-            | {error, [jsv:definition_error()]}.
+            | {error, [jsv:definition_error_reason()]}.
 
 -callback format_constraint_violation(jsv:constraint(),
                                       jsv:constraint_violation_details()) ->
@@ -45,7 +45,7 @@
             | invalid
             | {invalid, term()}
             | boolean()
-            | [jsv:definition_error()].
+            | [jsv:definition_error_reason()].
 
 -callback canonicalize(json:value(), jsv_validator:canonicalization_data(),
                        jsv_validator:state()) -> term().
