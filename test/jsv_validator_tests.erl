@@ -544,7 +544,8 @@ validate_catalogs_test_() ->
        jsv:register_catalog(test, Catalog)
    end,
    fun (_) ->
-       ok
+       jsv:unregister_catalog(test),
+       jsv_catalog_registry:stop()
    end,
    [?_assertError({invalid_definition, [{unknown_catalog, test2}]},
                   jsv:validate(42, {ref, test2, a})),
