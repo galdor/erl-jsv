@@ -23,7 +23,8 @@
 
 -type constraint() :: {element, jsv:definition()}
                     | {min_length, non_neg_integer()}
-                    | {max_length, non_neg_integer()}.
+                    | {max_length, non_neg_integer()}
+                    | {unique_elements, boolean()}.
 
 verify_constraint({element, Definition}, State) ->
   jsv_verifier:verify(State#{definition := Definition});
@@ -35,6 +36,10 @@ verify_constraint({max_length, Max}, _) when is_integer(Max), Max >= 0 ->
   ok;
 verify_constraint({max_length, _}, _) ->
   invalid;
+verify_constraint({unique_elements, Value}, _) when is_boolean(Value) ->
+  ok;
+verify_constraint({unique_elements, _}, _) ->
+  invalid;
 verify_constraint(_, _) ->
   unknown.
 
@@ -42,7 +47,13 @@ format_constraint_violation({min_length, Min}, _) ->
   {"value must contain at least ~0tp elements", [Min]};
 
 format_constraint_violation({max_length, Max}, _) ->
-  {"value must contain at most ~0tp elements", [Max]}.
+  {"value must contain at most ~0tp elements", [Max]};
+
+format_constraint_violation({unique_elements, true}, _) ->
+  {"value must not have duplicate element", []};
+
+format_constraint_violation({unique_elements, false}, _) ->
+  {"value must have at least one duplicate element", []}.
 
 validate_type(Value) when is_list(Value) ->
   {ok, []};
@@ -72,7 +83,13 @@ validate_constraint(Value, {min_length, Min}, _, _) ->
   length(Value) >= Min;
 
 validate_constraint(Value, {max_length, Max}, _, _) ->
-  length(Value) =< Max.
+  length(Value) =< Max;
+
+validate_constraint(Value, {unique_elements, true}, _, _) ->
+  length(Value) =:= length(lists:usort(Value));
+
+validate_constraint(Value, {unique_elements, false}, _, _) ->
+  length(Value) =/= length(lists:usort(Value)).
 
 canonicalize(_, CData, _) ->
   lists:reverse(CData).
