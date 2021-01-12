@@ -17,7 +17,7 @@
 -export([default_type_map/0,
          validate/2, validate/3,
          generate/2, generate/3,
-         verify_catalog/2, verify_definition/2,
+         verify_catalog/1, verify_catalog/2, verify_definition/2,
          format_value_error/2, format_value_errors/2,
          type_map/1,
          catalog_table_name/1, register_catalog/2, unregister_catalog/1,
@@ -162,6 +162,12 @@ generate(Term, Definition, Options) ->
   end,
   State = jsv_generator:init(Term, Definition, Options),
   jsv_generator:generate(State).
+
+-spec verify_catalog(catalog_name()) -> ok | {error, Reason} when
+    Reason :: [definition_error_reason()]
+            | {unknown_catalog, catalog_name()}.
+verify_catalog(CatalogName) ->
+  verify_catalog(CatalogName, #{}).
 
 -spec verify_catalog(catalog_name(), options()) -> ok | {error, Reason} when
     Reason :: [definition_error_reason()]
