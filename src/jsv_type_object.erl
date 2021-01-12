@@ -192,9 +192,11 @@ generate(_, _) ->
 
 -spec member_definition(binary(), jsv:definition()) ->
         {ok, jsv:definition()} | error.
-member_definition(Name, Definition) when is_atom(Definition) ->
-  member_definition(Name, {Definition, #{}});
-member_definition(Name, {_, #{members := Members}}) ->
+member_definition(Name, TypeName) when is_atom(TypeName) ->
+  member_definition(Name, {TypeName, #{}, #{}});
+member_definition(Name, {TypeName, Constraints}) ->
+  member_definition(Name, {TypeName, Constraints, #{}});
+member_definition(Name, {_, #{members := Members}, _}) ->
   %% This is quite bad, but keys of the members constraint can be binaries,
   %% strings or atoms. Not much we can do here, unless we enforce binaries
   %% which would make them annoying to type.
@@ -215,7 +217,7 @@ member_definition(Name, {_, #{members := Members}}) ->
             end
         end,
   Fun(maps:iterator(Members));
-member_definition(_Name, {_, #{value := Definition}}) ->
+member_definition(_Name, {_, #{value := Definition}, _}) ->
   {ok, Definition};
 member_definition(_Name, _) ->
   error.

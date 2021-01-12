@@ -29,6 +29,7 @@
               type/0, type_map/0,
               constraints/0, constraint/0,
               constraint_name/0, constraint_value/0,
+              extra/0, validate_fun/0, generate_fun/0,
               options/0,
               definition_error_reason/0,
               value_error/0, value_error_reason/0,
@@ -38,6 +39,7 @@
 
 -type definition() :: type()
                     | {type(), constraints()}
+                    | {type(), constraints(), extra()}
                     | {ref, definition_name()}
                     | {ref, catalog_name(), definition_name()}.
 
@@ -55,6 +57,14 @@
 -type constraint_name() :: atom().
 -type constraint_value() :: term().
 
+-type extra() :: #{validate => validate_fun(),
+                   generate => generate_fun()}.
+
+-type validate_fun() :: fun((term()) -> {ok, term()} |
+                                        {error, term(), unicode:chardata()}).
+-type generate_fun() :: fun((term()) -> {ok, term()} |
+                                        {error, term()}).
+
 -type options() :: #{type_map => type_map(),
                      format_value_errors => boolean(),
                      disable_verification => boolean(),
@@ -71,12 +81,13 @@
 -type value_error() ::
         #{reason := value_error_reason(),
           reason_string => binary(),
-          value := json:value(),
+          value := json:value() | term(),
           pointer := json_pointer:pointer(),
           pointer_string => binary()}.
 
 -type value_error_reason() ::
         {invalid_type, ExpectedType :: jsv:type()}
+      | {invalid_value, term(), unicode:chardata()}
       | {constraint_violation, jsv:type(), constraint()}
       | {constraint_violation, jsv:type(), constraint(),
          constraint_violation_details()}.
@@ -88,7 +99,8 @@
 
 -type constraint_violation_details() :: undefined | term().
 
--type generation_error_reason() :: {invalid_value, term(), jsv:type()}.
+-type generation_error_reason() :: {invalid_value, term()}
+                                 | {invalid_value, term(), jsv:type()}.
 
 %% Keywords are used in multiple types of constraints for literal JSON strings
 %% where having to type literal Erlang binaries would be painful. Object keys
@@ -198,6 +210,8 @@ format_value_error(Error = #{reason := Reason, pointer := Pointer},
   Msg = case Reason of
           {invalid_type, ExpectedType} ->
             io_lib:format(<<"value is not of type ~0tp">>, [ExpectedType]);
+          {invalid_value, _Reason, ReasonString} ->
+            io_lib:format(<<"invalid value: ~0ts">>, [ReasonString]);
           {constraint_violation, Type, Constraint} ->
             Module = maps:get(Type, TypeMap),
             case Module:format_constraint_violation(Constraint, undefined) of

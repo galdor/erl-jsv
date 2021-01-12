@@ -136,3 +136,16 @@ generate_datetime_test_() ->
                  jsv:generate({2020, 12, 4}, datetime)),
    ?_assertEqual({error, {invalid_value, {{2020, 12, 4}, 42}, datetime}},
                  jsv:generate({{2020, 12, 4}, 42}, datetime))].
+
+extra_generate_test_() ->
+  GenerateScore = fun
+                    ({score, N}) when N >= 0 ->
+                      {ok, <<"score:", (integer_to_binary(N))/binary>>};
+                    (_) ->
+                      {error, invalid_score}
+                  end,
+  Def = {string, #{}, #{generate => GenerateScore}},
+  [?_assertMatch({ok, <<"score:42">>},
+                 jsv:generate({score, 42}, Def)),
+   ?_assertMatch({error,{invalid_value, invalid_score}},
+                 jsv:generate({score, -123}, Def))].

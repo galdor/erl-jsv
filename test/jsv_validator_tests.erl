@@ -559,3 +559,18 @@ validate_catalogs_test_() ->
                   jsv:validate(42, {ref, test, d})),
     ?_assertMatch({ok, _},
                   jsv:validate(42, {ref, test, b}))]}.
+
+extra_validate_test_() ->
+  ValidateOddInteger = fun (I) ->
+                           case I rem 2 of
+                             0 -> {ok, I};
+                             1 -> {error, invalid_odd_integer,
+                                   "value is not an odd integer"}
+                           end
+                       end,
+  Def = {integer, #{}, #{validate => ValidateOddInteger}},
+  [?_assertMatch({ok, 42},
+                 jsv:validate(42, Def)),
+   ?_assertMatch({error, [#{reason :=
+                              {invalid_value, invalid_odd_integer, _}}]},
+                 jsv:validate(1, Def))].

@@ -18,7 +18,8 @@
 
 -behaviour(gen_server).
 
--export([table_name/1, start_link/0, register_catalog/2, unregister_catalog/1]).
+-export([table_name/1, start_link/0, stop/0,
+         register_catalog/2, unregister_catalog/1]).
 -export([init/1, terminate/2, handle_call/3, handle_cast/2, handle_info/2]).
 
 -type state() :: #{tables := #{jsv:catalog_name() := ets:tid()}}.
@@ -32,6 +33,10 @@ table_name(Name) ->
     Result :: {ok, pid()} | ignore | {error, term()}.
 start_link() ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+
+-spec stop() -> ok.
+stop() ->
+  gen_server:stop(?MODULE).
 
 -spec register_catalog(jsv:catalog_name(), jsv:catalog()) ->
         jsv:catalog_table_name().

@@ -78,7 +78,7 @@ canonicalize(_, CData, _) ->
   lists:reverse(CData).
 
 generate(Term, State) when is_list(Term) ->
-  {_, Constraints} = jsv_generator:state_definition(State),
+  {_, Constraints, _} = jsv_generator:state_definition(State),
   case Constraints of
     #{element := Definition} ->
       F = fun (Element) ->

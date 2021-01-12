@@ -34,12 +34,6 @@ init(Term, Definition, Options) ->
 
 -spec generate(state()) ->
         {ok, json:value()} | {error, jsv:generation_error_reason()}.
-generate(State = #{definition := TypeName}) when is_atom(TypeName) ->
-  generate(State#{definition => {TypeName, #{}}});
-generate(State = #{definition := {ref, Catalog, DefinitionName}}) ->
-  {ok, Definition} = jsv:find_catalog_definition(Catalog, DefinitionName),
-  generate(State#{definition => Definition,
-                  catalog => Catalog});
 generate(State = #{definition := {ref, DefinitionName}}) ->
   case maps:find(catalog, State) of
     {ok, Catalog} ->
@@ -47,23 +41,47 @@ generate(State = #{definition := {ref, DefinitionName}}) ->
     error ->
       {error, [no_current_catalog]}
   end;
+generate(State = #{definition := {ref, Catalog, DefinitionName}}) ->
+  {ok, Definition} = jsv:find_catalog_definition(Catalog, DefinitionName),
+  generate(State#{definition => Definition, catalog => Catalog});
+generate(State = #{definition := TypeName}) when is_atom(TypeName) ->
+  generate(State#{definition => {TypeName, #{}, #{}}});
+generate(State = #{definition := {TypeName, Constraints}}) ->
+  generate(State#{definition => {TypeName, Constraints, #{}}});
 generate(State = #{term := Term,
-                   definition := {Type, _},
+                   definition := (Definition = {Type, _, _}),
                    type_map := TypeMap}) ->
-  Module = maps:get(Type, TypeMap),
-  case lists:member({generate, 2}, Module:module_info(exports)) of
-    true ->
-      case Module:generate(Term, State) of
-        {ok, Value} ->
-          {ok, Value};
-        error ->
-          {error, {invalid_value, Term, Type}};
-        {error, Reason} ->
-          {error, Reason}
+  case maybe_extra_generate(Term, Definition) of
+    {ok, Term2} ->
+      Module = maps:get(Type, TypeMap),
+      case lists:member({generate, 2}, Module:module_info(exports)) of
+        true ->
+          case Module:generate(Term2, State) of
+            {ok, Value} ->
+              {ok, Value};
+            error ->
+              {error, {invalid_value, Term2, Type}};
+            {error, Reason} ->
+              {error, Reason}
+          end;
+        false ->
+          {ok, Term}
       end;
-    false ->
-      {ok, Term}
+    {error, Reason} ->
+      {error, Reason}
   end.
+
+-spec maybe_extra_generate(term(), jsv:definition()) ->
+        {ok, term()} | {error, jsv:generation_error_reason()}.
+maybe_extra_generate(Term, {_, _, #{generate := Generate}}) ->
+  case Generate(Term) of
+    {ok, Term2} ->
+      {ok, Term2};
+    {error, Reason} ->
+      {error, {invalid_value, Reason}}
+  end;
+maybe_extra_generate(Term, _) ->
+  {ok, Term}.
 
 -spec generate_child(term(), jsv:definition(), state()) ->
         {ok, json:value()} | {error, jsv:generation_error_reason()}.

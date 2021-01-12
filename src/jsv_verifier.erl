@@ -34,9 +34,6 @@ init(Definition, Options) ->
   end.
 
 -spec verify(state()) -> ok | {error, [jsv:definition_error_reason()]}.
-verify(State = #{definition := TypeName}) when
-    is_atom(TypeName) ->
-  verify(State#{definition => {TypeName, #{}}});
 verify(State = #{definition := {ref, DefinitionName}}) ->
   case maps:find(catalog, State) of
     {ok, Catalog} ->
@@ -51,9 +48,14 @@ verify(State = #{definition := {ref, Catalog, DefinitionName}}) ->
     {error, Reason} ->
       {error, [Reason]}
   end;
+verify(State = #{definition := TypeName}) when
+    is_atom(TypeName) ->
+  verify(State#{definition => {TypeName, #{}, #{}}});
+verify(State = #{definition := {TypeName, Constraints}}) ->
+  verify(State#{definition => {TypeName, Constraints, #{}}});
 verify(State = #{options := Options,
-                 definition := {TypeName, Constraints}}) when
-    is_atom(TypeName), is_map(Constraints) ->
+                 definition := {TypeName, Constraints, Extra}}) when
+    is_atom(TypeName), is_map(Constraints), is_map(Extra) ->
   case maps:find(TypeName, jsv:type_map(Options)) of
     {ok, Module} ->
       Exported = lists:member({verify_constraint, 2},

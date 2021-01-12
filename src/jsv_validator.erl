@@ -38,12 +38,6 @@ init(Value, Definition, Options) ->
 
 -spec validate(state()) ->
         {ok, term()} | {error, [jsv:value_error()]}.
-validate(State = #{definition := TypeName}) when is_atom(TypeName) ->
-  validate(State#{definition => {TypeName, #{}}});
-validate(State = #{definition := {ref, Catalog, DefinitionName}}) ->
-  {ok, Definition} = jsv:find_catalog_definition(Catalog, DefinitionName),
-  validate(State#{definition => Definition,
-                  catalog => Catalog});
 validate(State = #{definition := {ref, DefinitionName}}) ->
   case maps:find(catalog, State) of
     {ok, Catalog} ->
@@ -51,16 +45,25 @@ validate(State = #{definition := {ref, DefinitionName}}) ->
     error ->
       {error, [no_current_catalog]}
   end;
+validate(State = #{definition := {ref, Catalog, DefinitionName}}) ->
+  {ok, Definition} = jsv:find_catalog_definition(Catalog, DefinitionName),
+  validate(State#{definition => Definition,
+                  catalog => Catalog});
+validate(State = #{definition := TypeName}) when is_atom(TypeName) ->
+  validate(State#{definition => {TypeName, #{}, #{}}});
+validate(State = #{definition := {TypeName, Constraints}}) ->
+  validate(State#{definition => {TypeName, Constraints, #{}}});
 validate(State = #{value := Value,
-                   definition := {Type, _},
+                   definition := (Definition = {TypeName, _, _}),
                    type_map := TypeMap}) ->
-  Module = maps:get(Type, TypeMap),
+  Module = maps:get(TypeName, TypeMap),
   ValidateValue = fun (InputValue, CData) ->
                       case
                         validate_constraints(InputValue, Module, CData, State)
                       of
                         {ok, CData2} ->
-                          {ok, canonicalize(Module, Value, CData2, State)};
+                          Term = canonicalize(Module, Value, CData2, State),
+                          maybe_extra_validate(Term, Definition);
                         {error, Errors} ->
                           {error, Errors}
                       end
@@ -71,7 +74,7 @@ validate(State = #{value := Value,
     {ok, CData} ->
       ValidateValue(Value, CData);
     error ->
-      {error, [value_error(State, {invalid_type, Type})]}
+      {error, [value_error(State, {invalid_type, TypeName})]}
   end.
 
 -spec canonicalize(module(), json:value(),
@@ -85,11 +88,26 @@ canonicalize(Module, Value, CData, State) ->
       Value
   end.
 
+-spec maybe_extra_validate(term(), jsv:definition()) ->
+        {ok, term()} | {error, [jsv:value_error()]}.
+maybe_extra_validate(Term, {_, _, #{validate := Validate}}) ->
+  case Validate(Term) of
+    {ok, Term2} ->
+      {ok, Term2};
+    {error, Reason, ReasonString} ->
+      {error, [#{reason => {invalid_value, Reason, ReasonString},
+                 reason_string => ReasonString,
+                 value => Term,
+                 pointer => []}]}
+  end;
+maybe_extra_validate(Term, _) ->
+  {ok, Term}.
+
 -spec validate_constraints(json:value(), module(), canonicalization_data(),
                            state()) ->
         {ok, canonicalization_data()} | {error, [jsv:value_error()]}.
 validate_constraints(Value, Module, CData,
-                     State = #{definition := {Type, Constraints}}) ->
+                     State = #{definition := {Type, Constraints, _Extra}}) ->
   F = fun (ConstraintName, ConstraintValue, {CData2, Errors}) ->
           Constraint = {ConstraintName, ConstraintValue},
           case Module:validate_constraint(Value, Constraint, CData2, State) of
