@@ -2,7 +2,7 @@
 
 # Next Version
 ## Features
-- Add `jsv:verify_catalog/1`.
+- Add `jsv:verify_catalog/1` and `jsv:verify_catalog/2`.
 - Add experimental support for an extra set of data in type definitions. Use
   it for generation and validation functions.
 ## Bugs
