@@ -156,7 +156,7 @@ generate(Term, Definition, Options) ->
             | {unknown_catalog, catalog_name()}.
 verify_catalog(CatalogName, Options0) ->
   %% We need to set the current catalog since the definitions of the catalog
-  %% may include reference to other definitions in the same catalog, and will
+  %% may include references to other definitions in the same catalog, and will
   %% therefore use {ref, DefinitionName}.
   Options = Options0#{catalog => CatalogName},
   TableName = catalog_table_name(CatalogName),
