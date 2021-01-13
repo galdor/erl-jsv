@@ -131,14 +131,13 @@ validate(Value, Definition, Options) ->
     {ok, CanonicalValue} ->
       {ok, CanonicalValue};
     {error, Errors} ->
-      Errors2 = lists:reverse(Errors),
-      Errors3 = case maps:get(format_value_errors, Options, false) of
+      Errors2 = case maps:get(format_value_errors, Options, false) of
                   true ->
-                    format_value_errors(Errors2, Options);
+                    format_value_errors(Errors, Options);
                   false ->
-                    Errors2
+                    Errors
                 end,
-      {error, Errors3}
+      {error, Errors2}
   end.
 
 -spec generate(term(), definition()) ->
