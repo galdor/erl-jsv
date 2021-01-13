@@ -115,6 +115,8 @@ Represents a JSON array.
 Constraints:
 
 - `element`: the definition that must apply to all elements.
+- `unique_elements`: indicates that elements must be unique or have at least
+  one duplicate value.
 - `min_length`: the minimal number of elements in the array.
 - `max_length`: the maximum number of elements in the array.
 

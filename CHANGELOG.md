@@ -5,6 +5,7 @@
 - Add `jsv:verify_catalog/1` and `jsv:verify_catalog/2`.
 - Add experimental support for an extra set of data in type definitions. Use
   it for generation and validation functions.
+- Add a `unique_elements` constraint for arrays.
 ## Bugs
 - Fix the type signature of `jsv:validate/2`.
 - Delete catalog registry ETS tables on shutdown.
