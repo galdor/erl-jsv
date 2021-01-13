@@ -18,7 +18,8 @@
          validate/2, validate/3,
          generate/2, generate/3,
          verify_catalog/1, verify_catalog/2, verify_definition/2,
-         format_value_error/2, format_value_errors/2,
+         format_value_error/1, format_value_error/2,
+         format_value_errors/1, format_value_errors/2,
          type_map/1,
          catalog_table_name/1, register_catalog/2, unregister_catalog/1,
          find_catalog_definition/2,
@@ -208,6 +209,11 @@ verify_definition(Definition, Options) ->
   State = jsv_verifier:init(Definition, Options),
   jsv_verifier:verify(State).
 
+-spec format_value_error(value_error()) ->
+        value_error().
+format_value_error(Error) ->
+  format_value_error(Error, #{}).
+
 -spec format_value_error(value_error(), options()) -> value_error().
 format_value_error(Error = #{reason := Reason, pointer := Pointer},
                    Options) ->
@@ -238,6 +244,11 @@ format_value_error(Error = #{reason := Reason, pointer := Pointer},
         end,
   Error#{reason_string => iolist_to_binary(Msg),
          pointer_string => json_pointer:serialize(Pointer)}.
+
+-spec format_value_errors([value_error()]) ->
+        [value_error()].
+format_value_errors(Errors) ->
+  format_value_errors(Errors, #{}).
 
 -spec format_value_errors([value_error()], type_map()) ->
         [value_error()].
