@@ -50,10 +50,9 @@ format_constraint_violation({max_length, Max}, _) ->
   {"value must contain at most ~0tp elements", [Max]};
 
 format_constraint_violation({unique_elements, true}, _) ->
-  {"value must not have duplicate element", []};
-
+  {"value must not contain duplicate elements", []};
 format_constraint_violation({unique_elements, false}, _) ->
-  {"value must have at least one duplicate element", []}.
+  {"value must contain at least one duplicate element", []}.
 
 validate_type(Value) when is_list(Value) ->
   {ok, []};
