@@ -272,6 +272,12 @@ For `jsv:validate/3`, the following options are available:
   values.
 - `disable_verification`: do not verify the definition before validation.
 - `catalogs`: a set of catalogs to use during verification and validation.
+- `illegal_member_handling`: an atom indicating how to handle illegal
+  keys in objects; valid values are:
+  - `error`: return an error with the the illegal member.
+  - `keep`: return the object with the illegal members.
+  - `remove`: return the object without the illegal members. The default
+    value is `error`.
 
 ## Generation
 The `jsv:generate/2` and `jsv:generate/3` functions generate JSON values from

@@ -87,7 +87,11 @@ format_constraint_violation({required, _}, {missing_names, [Name]}) ->
   {"value must contain the following member: ~ts", [Name]};
 format_constraint_violation({required, _}, {missing_names, Names}) ->
   Data = lists:join(<<", ">>, lists:map(fun atom_to_binary/1, Names)),
-  {"value must contain the following members: ~ts", [iolist_to_binary(Data)]}.
+  {"value must contain the following members: ~ts", [iolist_to_binary(Data)]};
+format_constraint_violation({members, _}, {illegal_names, Names}) ->
+  Data = lists:join(<<", ">>, Names),
+  {"value must not contain the following illegal members: ~ts",
+   [iolist_to_binary(Data)]}.
 
 validate_type(Value) when is_map(Value) ->
   {ok, Value};
@@ -157,7 +161,21 @@ validate_constraint(Value, {members, Definitions}, CData, State) ->
       end,
   case maps:fold(F, {[], CData}, Definitions) of
     {[], CData4} ->
-      {ok, CData4};
+      LegalNames = maps:keys(Definitions),
+      case maps:keys(maps:without(LegalNames, CData4)) of
+        [] ->
+          {ok, CData4};
+        IllegalNames ->
+          Options = maps:get(options, State),
+          case maps:get(illegal_member_handling, Options, error) of
+            error ->
+              {invalid, {illegal_names, IllegalNames}};
+            keep ->
+              {ok, CData4};
+            remove ->
+              {ok, maps:without(IllegalNames, CData4)}
+          end
+      end;
     {Errors, _} ->
       Errors
   end.

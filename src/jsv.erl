@@ -68,7 +68,8 @@
 -type options() :: #{type_map => type_map(),
                      format_value_errors => boolean(),
                      disable_verification => boolean(),
-                     catalog => catalog_name()}.
+                     catalog => catalog_name(),
+                     illegal_member_handling => error | keep | remove}.
 
 -type definition_error_reason() ::
         {invalid_format, term()}
