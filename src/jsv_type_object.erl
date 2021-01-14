@@ -42,7 +42,7 @@ verify_constraint({max_size, _}, _) ->
   invalid;
 
 verify_constraint({required, Names}, _) when is_list(Names) ->
-  case lists:all(fun jsv:is_keyword/1, Names) of
+  case lists:all(fun is_atom/1, Names) of
     true ->
       ok;
     false ->
@@ -52,7 +52,7 @@ verify_constraint({required, _}, _) ->
   invalid;
 
 verify_constraint({members, Definitions}, State) when is_map(Definitions) ->
-  case lists:all(fun jsv:is_keyword/1, maps:keys(Definitions)) of
+  case lists:all(fun is_atom/1, maps:keys(Definitions)) of
     true ->
       F = fun (_, Definition, Errors) ->
               case jsv_verifier:verify(State#{definition := Definition}) of
@@ -86,7 +86,7 @@ format_constraint_violation({max_size, Max}, _) ->
 format_constraint_violation({required, _}, {missing_names, [Name]}) ->
   {"value must contain the following member: ~ts", [Name]};
 format_constraint_violation({required, _}, {missing_names, Names}) ->
-  Data = lists:join(<<", ">>, lists:map(fun jsv:keyword_value/1, Names)),
+  Data = lists:join(<<", ">>, lists:map(fun atom_to_binary/1, Names)),
   {"value must contain the following members: ~ts", [iolist_to_binary(Data)]}.
 
 validate_type(Value) when is_map(Value) ->
@@ -121,7 +121,7 @@ validate_constraint(Value, {max_size, Max}, _, _) ->
 
 validate_constraint(Value, {required, Names}, _, _) ->
   F = fun (Name0, MissingNames) ->
-          Name = jsv:keyword_value(Name0),
+          Name = atom_to_binary(Name0),
           case maps:is_key(Name, Value) of
             true ->
               MissingNames;
@@ -138,7 +138,7 @@ validate_constraint(Value, {required, Names}, _, _) ->
 
 validate_constraint(Value, {members, Definitions}, CData, State) ->
   F = fun (MemberName0, Definition, {Errors, CData2}) ->
-          MemberName = jsv:keyword_value(MemberName0),
+          MemberName = atom_to_binary(MemberName0),
           case maps:find(MemberName, Value) of
             {ok, MemberValue} ->
               case
@@ -167,8 +167,7 @@ canonicalize(_, CData, _) ->
 
 generate(Term, State) when is_map(Term) ->
   Definition = jsv_generator:state_definition(State),
-  F = fun (K, V, Acc) ->
-          MemberName = jsv:keyword_value(K),
+  F = fun (MemberName, V, Acc) ->
           case member_definition(MemberName, Definition) of
             {ok, MemberDefinition} ->
               case jsv_generator:generate_child(V, MemberDefinition, State) of
@@ -197,26 +196,7 @@ member_definition(Name, TypeName) when is_atom(TypeName) ->
 member_definition(Name, {TypeName, Constraints}) ->
   member_definition(Name, {TypeName, Constraints, #{}});
 member_definition(Name, {_, #{members := Members}, _}) ->
-  %% This is quite bad, but keys of the members constraint can be binaries,
-  %% strings or atoms. Not much we can do here, unless we enforce binaries
-  %% which would make them annoying to type.
-  %%
-  %% If definitions had to be put in catalog registries, we could transform
-  %% them during registration, but they can also be provided directly.
-  Fun = fun F(It) ->
-            case maps:next(It) of
-              {Key, Definition, It2} ->
-                case jsv:keyword_equal(Key, Name) of
-                  true ->
-                    {ok, Definition};
-                  false ->
-                    F(It2)
-                end;
-              none ->
-                error
-            end
-        end,
-  Fun(maps:iterator(Members));
+  maps:find(Name, Members);
 member_definition(_Name, {_, #{value := Definition}, _}) ->
   {ok, Definition};
 member_definition(_Name, _) ->

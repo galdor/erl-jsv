@@ -169,13 +169,13 @@ validate_string_test_() ->
                               {string, #{suffix => <<"bar">>}})),
    ?_assertMatch({ok, foo},
                  jsv:validate(<<"foo">>,
-                              {string, #{values => [<<"foo">>]}})),
+                              {string, #{values => [foo]}})),
    ?_assertMatch({ok, foo},
                  jsv:validate(<<"foo">>,
-                              {string, #{values => [foo, "bar"]}})),
+                              {string, #{values => [foo, bar]}})),
    ?_assertMatch({error, _},
                  jsv:validate(<<"foo">>,
-                              {string, #{values => [a, "b"]}}))].
+                              {string, #{values => [a, b]}}))].
 
 validate_array_test_() ->
   [?_assertMatch({ok, _},
@@ -283,52 +283,52 @@ validate_object_test_() ->
                               {object, #{value => integer}})),
    ?_assertEqual({ok, #{<<"a">> => 1, <<"b">> => 2}},
                  jsv:validate(#{<<"a">> => 1, <<"b">> => 2},
-                              {object, #{required => [<<"a">>, <<"b">>]}})),
+                              {object, #{required => [a, b]}})),
    ?_assertEqual({ok, #{<<"a">> => 1, <<"b">> => 2, <<"c">> => 3}},
                  jsv:validate(#{<<"a">> => 1, <<"b">> => 2, <<"c">> => 3},
-                              {object, #{required => [<<"a">>, <<"b">>]}})),
+                              {object, #{required => [a, b]}})),
    ?_assertMatch({error, _},
                  jsv:validate(#{<<"a">> => 1, <<"c">> => 3},
                               {object, #{required =>
-                                           [<<"a">>, <<"b">>]}})),
+                                           [a, b]}})),
    ?_assertMatch({error, _},
                  jsv:validate(#{<<"c">> => 3},
                               {object, #{required =>
-                                           [<<"a">>, <<"b">>]}})),
+                                           [a, b]}})),
    ?_assertEqual({ok, #{}},
                  jsv:validate(#{}, {object, #{required => []}})),
    ?_assertEqual({ok, #{a => 1, b => true}},
                  jsv:validate(#{<<"a">> => 1, <<"b">> => true},
                               {object, #{members =>
-                                           #{<<"a">> => integer,
-                                             <<"b">> => boolean}}})),
+                                           #{a => integer,
+                                             b => boolean}}})),
    ?_assertEqual({ok, #{a => 1}},
                  jsv:validate(#{<<"a">> => 1},
                               {object, #{members =>
-                                           #{<<"a">> => integer,
-                                             <<"b">> => boolean}}})),
+                                           #{a => integer,
+                                             b => boolean}}})),
    ?_assertEqual({ok, #{}},
                  jsv:validate(#{},
                               {object, #{members =>
-                                           #{<<"a">> => integer,
-                                             <<"b">> => boolean}}})),
+                                           #{a => integer,
+                                             b => boolean}}})),
    ?_assertMatch({error, _},
                  jsv:validate(#{<<"a">> => 1, <<"b">> => true},
                               {object, #{members =>
-                                           #{<<"a">> => integer,
-                                             <<"b">> => null}}})),
+                                           #{a => integer,
+                                             b => null}}})),
    ?_assertEqual({ok, #{a => 1, b => true}},
                  jsv:validate(#{<<"a">> => 1, <<"b">> => true},
                               {object, #{members =>
-                                           #{"a" => integer,
+                                           #{a => integer,
                                              b => boolean},
                                          required =>
-                                           [a, "b"]}})),
+                                           [a, b]}})),
    ?_assertEqual({ok, #{a => {2020, 8, 1}, <<"b">> => <<"2020-10-01">>}},
                  jsv:validate(#{<<"a">> => <<"2020-08-01">>,
                                 <<"b">> => <<"2020-10-01">>},
                               {object, #{members =>
-                                           #{<<"a">> => date}}}))].
+                                           #{a => date}}}))].
 
 validate_uuid_test_() ->
   [?_assertEqual({ok, <<202,180,203,128,76,102,78,212,

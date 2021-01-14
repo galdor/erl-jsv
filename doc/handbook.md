@@ -292,10 +292,10 @@ jsv:generate(#{a => 2,
 ```
 Returns:
 ```erlang
-{ok, #{<<"a">> => 2,
-       <<"b">> => <<"foo">>,
-       <<"c">> => <<"1lBaURQi3YcGvvNkAD6vVrp6mGN">>,
-       <<"d">> => <<"2020-12-04">>}}
+{ok, #{a => 2,
+       b => <<"foo">>,
+       c => <<"1lBaURQi3YcGvvNkAD6vVrp6mGN">>,
+       d => <<"2020-12-04">>}}
 ```
 
 During generation, value are handled according to their definition type:
@@ -308,9 +308,9 @@ During generation, value are handled according to their definition type:
   element generated using the `value` constraint if it exists, or the `any`
   type if it does not.
 - For type `object`, values are type checked and returned with each key
-  converted to a binary (with atoms, strings and binaries accepted as input)
-  and each value generated using the corresponding `members` or `values`
-  constraint if they exist, or the `any` type if they do not.
+  is keep as is and each value generated using the corresponding
+  `members` or `values` constraint if they exist, or the `any` type if
+  they do not.
 - For types `uuid` and `ksuid`, values are type checked, formatted and
   converted to binaries.
 - For type `uri`, values are type checked and returned without any

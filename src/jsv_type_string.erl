@@ -50,7 +50,7 @@ verify_constraint({suffix, _}, _) ->
 
 verify_constraint({values, Values}, _) when
     is_list(Values), length(Values) > 0 ->
-  case lists:all(fun jsv:is_keyword/1, Values) of
+  case lists:all(fun is_atom/1, Values) of
     true ->
       ok;
     false ->
@@ -75,12 +75,10 @@ format_constraint_violation({suffix, Suffix}, _) ->
   {"value must end with \"~ts\"", [Suffix]};
 
 format_constraint_violation({values, [Keyword]}, _) ->
-  String = json:serialize(jsv:keyword_value(Keyword)),
+  String = json:serialize(atom_to_binary(Keyword)),
   {"value must be the string \"~ts\"", [String]};
 format_constraint_violation({values, Keywords}, _) ->
-  Strings = lists:map(fun (K) ->
-                          json:serialize(jsv:keyword_value(K))
-                      end, Keywords),
+  Strings = lists:map(fun atom_to_binary/1, Keywords),
   Data = lists:join(<<", ">>, Strings),
   {"value must be one of the following strings: \"~ts\"", [Data]}.
 
@@ -118,7 +116,7 @@ validate_constraint(Value, {suffix, Suffix}, _, _) ->
   end;
 
 validate_constraint(Value, {values, Keywords}, _, _) ->
-  F = fun (K) -> jsv:keyword_equal(K, Value) end,
+  F = fun (K) -> atom_to_binary(K) =:= Value end,
   case lists:any(F, Keywords) of
     true ->
       {ok, binary_to_atom(Value)};

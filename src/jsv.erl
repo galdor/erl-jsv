@@ -22,8 +22,7 @@
          format_value_errors/1, format_value_errors/2,
          type_map/1,
          catalog_table_name/1, register_catalog/2, unregister_catalog/1,
-         find_catalog_definition/2,
-         is_keyword/1, keyword_value/1, keyword_equal/2]).
+         find_catalog_definition/2]).
 
 -export_type([definition/0, definition_name/0,
               catalog/0, catalog_name/0, catalog_table_name/0,
@@ -103,10 +102,7 @@
 -type generation_error_reason() :: {invalid_value, term()}
                                  | {invalid_value, term(), jsv:type()}.
 
-%% Keywords are used in multiple types of constraints for literal JSON strings
-%% where having to type literal Erlang binaries would be painful. Object keys
-%% are the most obvious example.
--type keyword() :: binary() | string() | atom().
+-type keyword() :: atom().
 
 -spec validate(json:value(), definition()) ->
         {ok, term()} | {error, [value_error()]}.
@@ -304,41 +300,3 @@ find_catalog_definition(CatalogName, DefinitionName) ->
           {error, {unknown_definition, CatalogName, DefinitionName}}
       end
   end.
-
--spec is_keyword(json:value()) -> boolean().
-is_keyword(Value) when is_binary(Value); is_atom(Value) ->
-  true;
-is_keyword(Value) when is_list(Value) ->
-  lists:all(fun
-              (E) when is_integer(E), E > 0 ->
-               true;
-              (_) ->
-               false
-           end, Value);
-is_keyword(_) ->
-  false.
-
--spec keyword_value(keyword()) -> binary().
-keyword_value(K) when is_binary(K) ->
-  K;
-keyword_value(K) when is_atom(K) ->
-  atom_to_binary(K);
-keyword_value(K) when is_list(K) ->
-  case unicode:characters_to_binary(K) of
-    Bin when is_binary(Bin) ->
-      Bin;
-    _ ->
-      error({invalid_string_data, K})
-  end.
-
--spec keyword_equal(keyword(), keyword()) -> boolean().
-keyword_equal(K1, K2) when is_binary(K1), is_binary(K2) ->
-  K1 =:= K2;
-keyword_equal(K1, K2) when is_atom(K1), is_atom(K2) ->
-  K1 =:= K2;
-keyword_equal(K1, K2) when is_list(K1), is_list(K2) ->
-  K1 =:= K2;
-keyword_equal(K1, K2) when is_list(K1), is_list(K2) ->
-  K1 =:= K2;
-keyword_equal(K1, K2) ->
-  keyword_value(K1) =:= keyword_value(K2).

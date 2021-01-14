@@ -1,6 +1,13 @@
 % erl-jsv changelog
 
 # Next Version
+## Breaking changes
+- Remove supports of `string` and `binary` erlang types as value in the
+  `values` constraint for `string` jsv type.
+- Remove supports of `string` and `binary` erlang types as member name
+  for `object` jsv type definition.
+- Remove `jsv:is_keyword/1`, `jsv:keyword_value/1` and
+  `jsv:keyword_equal/1` functions.
 ## Features
 - Add `jsv:verify_catalog/1` and `jsv:verify_catalog/2`.
 - Add experimental support for an extra set of data in type definitions. Use

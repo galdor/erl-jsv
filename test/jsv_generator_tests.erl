@@ -79,15 +79,15 @@ generate_array_test_() ->
                  jsv:generate([1, true, 3], {array, #{element => integer}}))].
 
 generate_object_test_() ->
-  [?_assertEqual({ok, #{<<"a">> => 1, <<"b">> => {data, <<"[]">>}}},
+  [?_assertEqual({ok, #{a => 1, <<"b">> => {data, <<"[]">>}}},
                  jsv:generate(#{a => 1, <<"b">> => {data, <<"[]">>}}, object)),
-   ?_assertEqual({ok, #{<<"a">> => <<"foo">>, <<"b">> => <<"bar">>}},
+   ?_assertEqual({ok, #{a => <<"foo">>, b => <<"bar">>}},
                  jsv:generate(#{a => foo, b => "bar"},
                               {object, #{value => string}})),
-   ?_assertEqual({ok, #{<<"a">> => <<"foo">>, <<"b">> => <<"2020-12-04">>}},
+   ?_assertEqual({ok, #{a => <<"foo">>, b => <<"2020-12-04">>}},
                  jsv:generate(#{a => foo, b => {2020, 12, 4}},
                               {object, #{members => #{a => string,
-                                                      "b" => date}}})),
+                                                      b => date}}})),
    ?_assertEqual({error, {invalid_value, [1, 2, 3], object}},
                  jsv:generate([1, 2, 3], object)),
    ?_assertEqual({error, {invalid_value, true, integer}},
@@ -96,7 +96,7 @@ generate_object_test_() ->
    ?_assertEqual({error, {invalid_value, {1, 2}, date}},
                  jsv:generate(#{a => <<"">>, b => {1, 2}},
                               {object, #{members => #{a => string,
-                                                      "b" => date}}}))].
+                                                      b => date}}}))].
 
 generate_uuid_test_() ->
   [?_assertEqual({ok, <<"da0d1078-d2cb-4001-9009-0bb953f75dcb">>},
