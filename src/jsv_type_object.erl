@@ -25,8 +25,8 @@
 -type constraint() :: {value, jsv:definition()}
                     | {min_size, non_neg_integer()}
                     | {max_size, non_neg_integer()}
-                    | {required, Names :: [jsv:keyword()]}
-                    | {members, #{jsv:keyword() := jsv:definition()}}.
+                    | {required, Names :: [atom()]}
+                    | {members, #{atom() := jsv:definition()}}.
 
 verify_constraint({value, Definition}, State) ->
   jsv_verifier:verify(State#{definition := Definition});

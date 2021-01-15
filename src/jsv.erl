@@ -34,8 +34,7 @@
               definition_error_reason/0,
               value_error/0, value_error_reason/0,
               constraint_violation_details/0,
-              generation_error_reason/0,
-              keyword/0]).
+              generation_error_reason/0]).
 
 -type definition() :: type()
                     | {type(), constraints()}
@@ -104,8 +103,6 @@
 
 -type generation_error_reason() :: {invalid_value, term()}
                                  | {invalid_value, term(), jsv:type()}.
-
--type keyword() :: atom().
 
 -spec validate(json:value(), definition()) ->
         {ok, term()} | {error, [value_error()]}.
