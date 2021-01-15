@@ -173,7 +173,7 @@ validate_constraint(Value, {members, Definitions}, CData, State) ->
             keep ->
               {ok, CData4};
             remove ->
-              {ok, maps:without(InvalidNames, CData4)}
+              {ok, maps:with(ValidNames, CData4)}
           end
       end;
     {Errors, _} ->
@@ -184,6 +184,7 @@ canonicalize(_, CData, _) ->
   CData.
 
 generate(Term, State) when is_map(Term) ->
+  Options = jsv_generator:state_options(State),
   Definition = jsv_generator:state_definition(State),
   F = fun (MemberName, V, Acc) ->
           case member_definition(MemberName, Definition) of
@@ -199,7 +200,26 @@ generate(Term, State) when is_map(Term) ->
           end
       end,
   try
-    {ok, maps:fold(F, #{}, Term)}
+    Data = maps:fold(F, #{}, Term),
+    case Definition of
+      {_, #{members := Members}, _} ->
+        ValidNames = maps:keys(Members),
+        case maps:keys(maps:without(ValidNames, Data)) of
+          [] ->
+            {ok, Data};
+          InvalidNames ->
+            case maps:get(invalid_member_handling, Options, error) of
+              error ->
+                {error, {invalid_names, InvalidNames}};
+              keep ->
+                {ok, Data};
+              remove ->
+                {ok, maps:with(ValidNames, Data)}
+            end
+          end;
+      _ ->
+        {ok, Data}
+    end
   catch
     throw:{error, Reason} ->
       {error, Reason}

@@ -329,3 +329,16 @@ reasons:
 - The impact on performances would be significant. Paying this price to ensure
   data are validated in input makes sense, but doing it for the output is not
   as beneficial.
+
+### Options
+For `jsv:generate/3`, the following options are available:
+
+- `type_map`: the type map to use (default: `jsv:default_type_map()`).
+- `disable_verification`: do not verify the definition before generation.
+- `catalogs`: a set of catalogs to use during verification and generation.
+- `invalid_member_handling`: an atom indicating how to handle invalid keys in
+  objects with a `members` constraint; valid values are:
+  - `error`: return an error when at least one invalid member is found.
+  - `keep`: return invalid members in the canonical value.
+  - `remove`: silently remove invalid members from the canonical value.
+  The default value is `error`.

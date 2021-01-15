@@ -14,7 +14,8 @@
 
 -module(jsv_generator).
 
--export([init/3, generate/1, generate_child/3, state_definition/1]).
+-export([init/3, generate/1, generate_child/3,
+         state_definition/1, state_options/1]).
 
 -export_type([state/0]).
 
@@ -92,3 +93,7 @@ generate_child(Term, Definition, State) ->
 -spec state_definition(state()) -> jsv:definition().
 state_definition(#{definition := Definition}) ->
   Definition.
+
+-spec state_options(state()) -> jsv:options().
+state_options(#{options := Options}) ->
+  Options.
