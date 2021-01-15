@@ -338,18 +338,18 @@ validate_object_test_() ->
                                 <<"b">> => <<"2020-10-01">>},
                               {object, #{members =>
                                            #{a => date}}},
-                             #{illegal_member_handling => error})),
+                             #{invalid_member_handling => error})),
    ?_assertEqual({ok, #{a => {2020, 8, 1}}},
                  jsv:validate(#{<<"a">> => <<"2020-08-01">>},
                               {object, #{members =>
                                            #{a => date}}},
-                             #{illegal_member_handling => remove})),
+                             #{invalid_member_handling => remove})),
    ?_assertEqual({ok, #{a => {2020, 8, 1}, <<"b">> => <<"2020-10-01">>}},
                  jsv:validate(#{<<"a">> => <<"2020-08-01">>,
                                 <<"b">> => <<"2020-10-01">>},
                               {object, #{members =>
                                            #{a => date}}},
-                             #{illegal_member_handling => keep}))].
+                             #{invalid_member_handling => keep}))].
 
 validate_uuid_test_() ->
   [?_assertEqual({ok, <<202,180,203,128,76,102,78,212,

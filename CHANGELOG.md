@@ -1,23 +1,21 @@
 % erl-jsv changelog
 
 # Next Version
-## Breaking changes
-- Remove supports of `string` and `binary` erlang types as value in the
-  `values` constraint for `string` jsv type.
-- Remove supports of `string` and `binary` erlang types as member name
-  for `object` jsv type definition.
-- Remove `jsv:is_keyword/1`, `jsv:keyword_value/1` and
-  `jsv:keyword_equal/1` functions.
 ## Features
 - Add `jsv:verify_catalog/1` and `jsv:verify_catalog/2`.
 - Add experimental support for an extra set of data in type definitions. Use
   it for generation and validation functions.
 - Add a `unique_elements` constraint for arrays.
+- Add an `invalid_member_handling` option to treat object with a `members`
+  constraint as records and define how to handle members which are not part of
+  it.
 ## Bugs
 - Fix the type signature of `jsv:validate/2`.
 - Delete catalog registry ETS tables on shutdown.
 ## Misc
 - Rename the `jsv:definition_error/0` type to `jsv:definition_error_reason/0`.
+- Remove the entire notion of keywords; object member constraints and string
+  value constraints must use atoms. This makes the code significantly simpler.
 
 # 1.2.0
 ## Features

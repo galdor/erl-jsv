@@ -272,12 +272,12 @@ For `jsv:validate/3`, the following options are available:
   values.
 - `disable_verification`: do not verify the definition before validation.
 - `catalogs`: a set of catalogs to use during verification and validation.
-- `illegal_member_handling`: an atom indicating how to handle illegal
-  keys in objects; valid values are:
-  - `error`: return an error with the the illegal member.
-  - `keep`: return the object with the illegal members.
-  - `remove`: return the object without the illegal members. The default
-    value is `error`.
+- `invalid_member_handling`: an atom indicating how to handle invalid keys in
+  objects with a `members` constraint; valid values are:
+  - `error`: return an error when at least one invalid member is found.
+  - `keep`: return invalid members in the canonical value.
+  - `remove`: silently remove invalid members from the canonical value.
+  The default value is `error`.
 
 ## Generation
 The `jsv:generate/2` and `jsv:generate/3` functions generate JSON values from
@@ -313,10 +313,9 @@ During generation, value are handled according to their definition type:
 - For type `array`, values are type checked and returned with each array
   element generated using the `value` constraint if it exists, or the `any`
   type if it does not.
-- For type `object`, values are type checked and returned with each key
-  is keep as is and each value generated using the corresponding
-  `members` or `values` constraint if they exist, or the `any` type if
-  they do not.
+- For type `object`, values are type checked and returned with each key keep
+  unmodified and each value generated using the corresponding `members` or
+  `values` constraint if they exist, or the `any` type if they do not.
 - For types `uuid` and `ksuid`, values are type checked, formatted and
   converted to binaries.
 - For type `uri`, values are type checked and returned without any
