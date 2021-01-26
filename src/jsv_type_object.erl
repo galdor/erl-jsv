@@ -130,7 +130,7 @@ validate_constraint(Value, {required, Names}, _, _) ->
             true ->
               MissingNames;
             false ->
-              [Name | MissingNames]
+              [Name0 | MissingNames]
           end
       end,
   case lists:foldl(F, [], Names) of
