@@ -38,9 +38,9 @@ init(Definition, Options) ->
   end.
 
 -spec verify(state()) -> ok | {error, [jsv:definition_error_reason()]}.
-verify(#{definition := {any, []}}) ->
+verify(#{definition := {one_of, []}}) ->
   {error, [invalid_empty_definition_list]};
-verify(State = #{definition := {any, Definitions}}) when
+verify(State = #{definition := {one_of, Definitions}}) when
     is_list(Definitions) ->
   case
     lists:foldl(fun (Def, Acc) ->

@@ -575,19 +575,19 @@ validate_datetime_test_() ->
                               {datetime, #{max => {{2010, 1, 1},
                                                    {12, 0, 0}}}}))].
 
-validate_any_definitions_test_() ->
+validate_one_of_test_() ->
   [?_assertError({invalid_definition, [invalid_empty_definition_list]},
-                 jsv:validate(42, {any, []})),
+                 jsv:validate(42, {one_of, []})),
    ?_assertEqual({ok, 42},
-                jsv:validate(42, {any, [string, integer]})),
+                jsv:validate(42, {one_of, [string, integer]})),
    ?_assertEqual({ok, <<"foo">>},
-                 jsv:validate(<<"foo">>, {any, [string, integer]})),
+                 jsv:validate(<<"foo">>, {one_of, [string, integer]})),
    ?_assertMatch({error, [#{reason := invalid_type}]},
-                 jsv:validate(true, {any, [string, integer]})),
+                 jsv:validate(true, {one_of, [string, integer]})),
    ?_assertEqual({ok, <<"2020-01-28">>},
-                 jsv:validate(<<"2020-01-28">>, {any, [string, date]})),
+                 jsv:validate(<<"2020-01-28">>, {one_of, [string, date]})),
    ?_assertEqual({ok, {2020,1,28}},
-                 jsv:validate(<<"2020-01-28">>, {any, [date, string]}))].
+                 jsv:validate(<<"2020-01-28">>, {one_of, [date, string]}))].
 
 validate_catalogs_test_() ->
   {setup,

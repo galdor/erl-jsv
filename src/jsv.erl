@@ -42,7 +42,7 @@
                     | {type(), constraints(), extra()}
                     | {ref, definition_name()}
                     | {ref, catalog_name(), definition_name()}
-                    | {any, [definition()]}.
+                    | {one_of, [definition()]}.
 
 -type definition_name() :: atom().
 

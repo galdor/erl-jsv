@@ -35,7 +35,7 @@ init(Term, Definition, Options) ->
 
 -spec generate(state()) ->
         {ok, json:value()} | {error, jsv:generation_error_reason()}.
-generate(State = #{term := Term, definition := {any, Definitions}}) when
+generate(State = #{term := Term, definition := {one_of, Definitions}}) when
     is_list(Definitions) ->
   Fun = fun
           F ([]) ->

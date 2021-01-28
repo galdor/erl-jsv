@@ -38,7 +38,7 @@ init(Value, Definition, Options) ->
 
 -spec validate(state()) ->
         {ok, term()} | {error, [jsv:value_error()]}.
-validate(State = #{definition := {any, Definitions}}) when
+validate(State = #{definition := {one_of, Definitions}}) when
     is_list(Definitions) ->
   Fun = fun
           F ([]) ->
