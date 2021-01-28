@@ -17,7 +17,8 @@
 -export([default_type_map/0,
          validate/2, validate/3,
          generate/2, generate/3,
-         verify_catalog/1, verify_catalog/2, verify_definition/2,
+         verify_catalog/1, verify_catalog/2,
+         verify_definition/1, verify_definition/2,
          format_value_error/1, format_value_error/2,
          format_value_errors/1, format_value_errors/2,
          type_map/1,
@@ -198,6 +199,11 @@ verify_catalog_definition(Table, Name, Options) ->
     {error, Errors} ->
       {error, {invalid_definition, Errors, Name}}
   end.
+
+-spec verify_definition(definition()) ->
+        ok | {error, [definition_error_reason()]}.
+verify_definition(Definition) ->
+  verify_definition(Definition, #{}).
 
 -spec verify_definition(definition(), options()) ->
         ok | {error, [definition_error_reason()]}.
