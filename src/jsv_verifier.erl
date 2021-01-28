@@ -38,6 +38,23 @@ init(Definition, Options) ->
   end.
 
 -spec verify(state()) -> ok | {error, [jsv:definition_error_reason()]}.
+verify(#{definition := {any, []}}) ->
+  {error, [invalid_empty_definition_list]};
+verify(State = #{definition := {any, Definitions}}) when
+    is_list(Definitions) ->
+  case
+    lists:foldl(fun (Def, Acc) ->
+                    case verify(State#{definition := Def}) of
+                      ok -> Acc;
+                      {error, Errors} -> Acc ++ Errors
+                    end
+                end, [], Definitions)
+  of
+    [] ->
+      ok;
+    Errors ->
+      {error, Errors}
+  end;
 verify(State = #{definition := {ref, DefinitionName}}) ->
   case maps:find(catalog, State) of
     {ok, Catalog} ->

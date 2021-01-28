@@ -35,6 +35,20 @@ init(Term, Definition, Options) ->
 
 -spec generate(state()) ->
         {ok, json:value()} | {error, jsv:generation_error_reason()}.
+generate(State = #{term := Term, definition := {any, Definitions}}) when
+    is_list(Definitions) ->
+  Fun = fun
+          F ([]) ->
+            {error, {invalid_value, Term}};
+          F ([Def | Defs]) ->
+            case generate(State#{definition := Def}) of
+              {ok, Value} ->
+                {ok, Value};
+              {error, _} ->
+                F(Defs)
+            end
+        end,
+  Fun(Definitions);
 generate(State = #{definition := {ref, DefinitionName}}) ->
   case maps:find(catalog, State) of
     {ok, Catalog} ->

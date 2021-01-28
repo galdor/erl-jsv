@@ -38,6 +38,20 @@ init(Value, Definition, Options) ->
 
 -spec validate(state()) ->
         {ok, term()} | {error, [jsv:value_error()]}.
+validate(State = #{definition := {any, Definitions}}) when
+    is_list(Definitions) ->
+  Fun = fun
+          F ([]) ->
+            {error, [value_error(State, invalid_type)]};
+          F ([Def | Defs]) ->
+            case validate(State#{definition := Def}) of
+              {ok, Value} ->
+                {ok, Value};
+              {error, _} ->
+                F(Defs)
+            end
+        end,
+  Fun(Definitions);
 validate(State = #{definition := {ref, DefinitionName}}) ->
   case maps:find(catalog, State) of
     {ok, Catalog} ->

@@ -10,6 +10,7 @@
   constraint as records and define how to handle members which are not part of
   it.
 - Add `jsv:verify_definition/1`.
+- Introduce the `{any, Definitions}` definition combinator.
 ## Bugs
 - Fix the type signature of `jsv:validate/2`.
 - Delete catalog registry ETS tables on shutdown.

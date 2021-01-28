@@ -41,7 +41,8 @@
                     | {type(), constraints()}
                     | {type(), constraints(), extra()}
                     | {ref, definition_name()}
-                    | {ref, catalog_name(), definition_name()}.
+                    | {ref, catalog_name(), definition_name()}
+                    | {any, [definition()]}.
 
 -type definition_name() :: atom().
 
@@ -79,6 +80,7 @@
       | {unknown_constraint, jsv:type(), jsv:constraint()}
       | {invalid_constraint, jsv:type(),
          jsv:constraint(), term()}
+      | invalid_empty_definition_list
       | catalog_definition_error_reason().
 
 -type value_error() ::
@@ -89,7 +91,8 @@
           pointer_string => binary()}.
 
 -type value_error_reason() ::
-        {invalid_type, ExpectedType :: jsv:type()}
+        invalid_type
+      | {invalid_type, ExpectedType :: jsv:type()}
       | {invalid_value, term(), unicode:chardata()}
       | {constraint_violation, jsv:type(), constraint()}
       | {constraint_violation, jsv:type(), constraint(),
@@ -221,6 +224,8 @@ format_value_error(Error = #{reason := Reason, pointer := Pointer},
                    Options) ->
   TypeMap = type_map(Options),
   Msg = case Reason of
+          invalid_type ->
+            <<"value does not match any expected type">>;
           {invalid_type, ExpectedType} ->
             io_lib:format(<<"value is not of type ~0tp">>, [ExpectedType]);
           {invalid_value, _Reason, ReasonString} ->

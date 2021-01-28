@@ -16,6 +16,8 @@ Definitions are represented as one of the following values:
 - `{ref, DefinitionName}`: a reference to a definition in the current catalog.
 - `{ref, CatalogName, DefinitionName}`: a reference to a definition from a
   catalog.
+- `{any, Definitions}`: a combination of multiple definitions where at least
+  one of the combination must match the value.
 
 For example, the following definition represents arrays containing at least 3
 strictly positive integers:
@@ -217,6 +219,9 @@ Values are canonicalized as follows:
   a `values` constraint.
 
 Other values are unaffected by canonicalization.
+
+If the definition is of the form `{any, Definitions}`, the canonical value
+produced by the first matching definition is returned.
 
 # Errors
 Validation errors are reported as maps containing information about the
