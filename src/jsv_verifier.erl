@@ -20,12 +20,16 @@
 
 -type state() :: #{options := jsv:options(),
                    definition := jsv:definition(),
-                   catalog => jsv:catalog_name()}.
+                   catalog => jsv:catalog_name(),
+                   verified_definitions :=
+                     #{{jsv:catalog_name(), jsv:definition_name()} :=
+                         boolean()}}.
 
 -spec init(jsv:definition(), jsv:options()) -> state().
 init(Definition, Options) ->
   State = #{options => Options,
-            definition => Definition},
+            definition => Definition,
+            verified_definitions => #{}},
   case maps:find(catalog, Options) of
     {ok, Catalog} ->
       State#{catalog => Catalog};
@@ -41,12 +45,22 @@ verify(State = #{definition := {ref, DefinitionName}}) ->
     error ->
       {error, [no_current_catalog]}
   end;
-verify(State = #{definition := {ref, Catalog, DefinitionName}}) ->
-  case jsv:find_catalog_definition(Catalog, DefinitionName) of
-    {ok, Definition} ->
-      verify(State#{definition => Definition, catalog => Catalog});
-    {error, Reason} ->
-      {error, [Reason]}
+verify(State = #{definition := {ref, Catalog, DefinitionName},
+                 verified_definitions := VerifiedDefinitions}) ->
+  Key = {Catalog, DefinitionName},
+  case maps:is_key(Key, VerifiedDefinitions) of
+    true ->
+      ok;
+    false ->
+      case jsv:find_catalog_definition(Catalog, DefinitionName) of
+        {ok, Definition} ->
+          verify(State#{definition => Definition,
+                        catalog => Catalog,
+                        verified_definitions =>
+                          VerifiedDefinitions#{Key => true}});
+        {error, Reason} ->
+          {error, [Reason]}
+      end
   end;
 verify(State = #{definition := TypeName}) when
     is_atom(TypeName) ->
