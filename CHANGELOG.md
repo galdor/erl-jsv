@@ -15,6 +15,7 @@
 - Fix the type signature of `jsv:validate/2`.
 - Delete catalog registry ETS tables on shutdown.
 - Fix circular reference handling in definition verification.
+- Fix value error formatting.
 ## Misc
 - Rename the `jsv:definition_error/0` type to `jsv:definition_error_reason/0`.
 - Remove the entire notion of keywords; object member constraints and string

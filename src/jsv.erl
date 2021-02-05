@@ -229,7 +229,7 @@ format_value_error(Error = #{reason := Reason, pointer := Pointer},
           {invalid_type, ExpectedType} ->
             io_lib:format(<<"value is not of type ~0tp">>, [ExpectedType]);
           {invalid_value, _Reason, ReasonString} ->
-            io_lib:format(<<"invalid value: ~0ts">>, [ReasonString]);
+            io_lib:format(<<"invalid value: ~ts">>, [ReasonString]);
           {constraint_violation, Type, Constraint} ->
             Module = maps:get(Type, TypeMap),
             case Module:format_constraint_violation(Constraint, undefined) of
