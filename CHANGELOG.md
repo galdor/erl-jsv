@@ -20,6 +20,10 @@
 - Rename the `jsv:definition_error/0` type to `jsv:definition_error_reason/0`.
 - Remove the entire notion of keywords; object member constraints and string
   value constraints must use atoms. This makes the code significantly simpler.
+- Avoid calls to `module_info`, making verification, validation and generation
+  significantly faster. For example, on a very large catalog (hundreds of
+  definitions), verification is around 240 times faster, going down from 6
+  seconds to 25 milliseconds.
 
 # 1.2.0
 ## Features

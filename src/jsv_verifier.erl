@@ -89,17 +89,16 @@ verify(State = #{options := Options,
     is_atom(TypeName), is_map(Constraints), is_map(Extra) ->
   case maps:find(TypeName, jsv:type_map(Options)) of
     {ok, Module} ->
-      Exported = lists:member({verify_constraint, 2},
-                              Module:module_info(exports)),
-      VerifyConstraint = case Exported of
-                           true ->
-                             fun (C, S) -> Module:verify_constraint(C, S) end;
-                           false ->
-                             fun (_, _) -> unknown end
-                         end,
       F = fun (ConstraintName, ConstraintValue, Errors) ->
               Constraint = {ConstraintName, ConstraintValue},
-              case VerifyConstraint(Constraint, State) of
+              Result = case
+                         jsv_utils:call_if_defined(Module, verify_constraint,
+                                                   [Constraint, State])
+                       of
+                         {ok, Res} -> Res;
+                         undefined -> unknown
+                       end,
+              case Result of
                 ok ->
                   Errors;
                 unknown ->

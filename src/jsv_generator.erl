@@ -69,17 +69,14 @@ generate(State = #{term := Term,
   case maybe_extra_generate(Term, Definition) of
     {ok, Term2} ->
       Module = maps:get(Type, TypeMap),
-      case lists:member({generate, 2}, Module:module_info(exports)) of
-        true ->
-          case Module:generate(Term2, State) of
-            {ok, Value} ->
-              {ok, Value};
-            error ->
-              {error, {invalid_value, Term2, Type}};
-            {error, Reason} ->
-              {error, Reason}
-          end;
-        false ->
+      case jsv_utils:call_if_defined(Module, generate, [Term2, State]) of
+        {ok, {ok, Value}} ->
+          {ok, Value};
+        {ok, error} ->
+          {error, {invalid_value, Term2, Type}};
+        {ok, {error, Reason}} ->
+          {error, Reason};
+        undefined ->
           {ok, Term}
       end;
     {error, Reason} ->

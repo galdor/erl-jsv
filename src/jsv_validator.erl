@@ -95,10 +95,12 @@ validate(State = #{value := Value,
                    jsv_validator:canonicalization_data(),
                    jsv_validator:state()) -> term().
 canonicalize(Module, Value, CData, State) ->
-  case lists:member({canonicalize, 3}, Module:module_info(exports)) of
-    true ->
-      Module:canonicalize(Value, CData, State);
-    false ->
+  case
+    jsv_utils:call_if_defined(Module, canonicalize, [Value, CData, State])
+  of
+    {ok, Value2} ->
+      Value2;
+    undefined ->
       Value
   end.
 

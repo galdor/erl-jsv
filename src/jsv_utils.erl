@@ -14,7 +14,8 @@
 
 -module(jsv_utils).
 
--export([fold_list_with_index/3]).
+-export([fold_list_with_index/3,
+         call_if_defined/3]).
 
 -spec fold_list_with_index(fun((Index, Element, Acc) -> Acc), Acc, [Element]) ->
         Acc when
@@ -26,3 +27,24 @@ fold_list_with_index(F, Acc, List) ->
                               {I+1, F(I, Element, Acc2)}
                           end, {0, Acc}, List),
   Acc2.
+
+-spec call_if_defined(module(), atom(), [term()]) -> {ok, term()} | undefined.
+call_if_defined(Module, Function, Args) ->
+  %% Checking if a module exports a function is surprisingly tricky:
+  %% erlang:function_exported/3 will always return false when running in an
+  %% escript, making it useless. Looking up the content of
+  %% Module:module_info(exports) works, but is incredibly slow; slow enough
+  %% that it becomes a huge bottleneck during verification, validation and
+  %% generation.
+  %%
+  %% And of course, both of them may introduce a race condition since the
+  %% module being checked can be upgraded after the verification but before
+  %% the actual call.
+  %%
+  %% Ultimately, the only fast and accurate way is to check for undef.
+  try
+    {ok, apply(Module, Function, Args)}
+  catch
+    error:undef ->
+      undefined
+  end.
