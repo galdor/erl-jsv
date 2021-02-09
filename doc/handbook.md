@@ -328,12 +328,15 @@ During generation, value are handled according to their definition type:
 - For types `time`, `date` and `datetime`, values are type checked, formatted,
   and converted to binaries.
 
-Note that generation function only check types, not constraints, for two
-reasons:
+Note that generation function only check types and a minimal amount of
+constraints, for two reasons:
 - It would be quite complex due to the multiple necessary type conversions.
 - The impact on performances would be significant. Paying this price to ensure
   data are validated in input makes sense, but doing it for the output is not
   as beneficial.
+
+Constraints currently checked during generation are `members` and `required`
+for objects.
 
 ### Options
 For `jsv:generate/3`, the following options are available:

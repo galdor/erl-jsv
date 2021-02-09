@@ -202,8 +202,8 @@ generate(Term, State) when is_map(Term) ->
   try
     Value = maps:fold(F, #{}, Term),
     case Definition of
-      {_, #{members := Members}, _} ->
-        generate_check_members(Value, Members, Options);
+      {_, Constraints = #{members := _}, _} ->
+        generate_check_members(Value, Constraints, Options);
       _ ->
         {ok, Value}
     end
@@ -214,14 +214,20 @@ generate(Term, State) when is_map(Term) ->
 generate(_, _) ->
   error.
 
--spec generate_check_members(json:value(), #{atom() := jsv:definition()},
+-spec generate_check_members(json:value(), jsv:constraints(),
                              jsv:options()) ->
         {ok, json:value()} | {error, jsv:generation_error_reason()}.
-generate_check_members(Value, Members, Options) ->
+generate_check_members(Value, Constraints = #{members := Members}, Options) ->
   ValidNames = maps:keys(Members),
   case maps:keys(maps:without(ValidNames, Value)) of
     [] ->
-      {ok, Value};
+      RequiredNames = maps:get(required, Constraints, []),
+      case [Name || Name <- RequiredNames, not is_map_key(Name, Value)] of
+        [] ->
+          {ok, Value};
+        MissingNames ->
+          {error, {missing_members, MissingNames, Value}}
+      end;
     InvalidNames ->
       case maps:get(invalid_member_handling, Options, error) of
         error ->
