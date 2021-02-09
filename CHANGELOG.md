@@ -9,6 +9,7 @@
 - Add an `invalid_member_handling` option to treat object with a `members`
   constraint as records and define how to handle members which are not part of
   it.
+- Check object member validity during generation
 - Add `jsv:verify_definition/1`.
 - Introduce the `{one_of, Definitions}` definition combinator.
 ## Bugs
