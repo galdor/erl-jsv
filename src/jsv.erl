@@ -105,8 +105,11 @@
 
 -type constraint_violation_details() :: undefined | term().
 
--type generation_error_reason() :: {invalid_value, term()}
-                                 | {invalid_value, term(), jsv:type()}.
+-type generation_error_reason() ::
+        {invalid_value, term()}
+      | {invalid_value, term(), jsv:type()}
+      | {missing_members, [atom()], term()}
+      | {invalid_members, [atom()], term()}.
 
 -spec validate(json:value(), definition()) ->
         {ok, term()} | {error, [value_error()]}.

@@ -106,7 +106,8 @@ generate_object_test_() ->
                  jsv:generate(#{foo => <<"bar">>, bar => <<"foo">>},
                               {object, #{members => #{foo => string}}},
                               #{invalid_member_handling => keep})),
-   ?_assertEqual({error, {invalid_names, [bar]}},
+   ?_assertEqual({error, {invalid_members, [bar],
+                          #{foo => <<"bar">>, bar => <<"foo">>}}},
                  jsv:generate(#{foo => <<"bar">>, bar => <<"foo">>},
                               {object, #{members => #{foo => string}}},
                               #{invalid_member_handling => error}))].

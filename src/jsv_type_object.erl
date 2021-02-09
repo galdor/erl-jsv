@@ -200,25 +200,12 @@ generate(Term, State) when is_map(Term) ->
           end
       end,
   try
-    Data = maps:fold(F, #{}, Term),
+    Value = maps:fold(F, #{}, Term),
     case Definition of
       {_, #{members := Members}, _} ->
-        ValidNames = maps:keys(Members),
-        case maps:keys(maps:without(ValidNames, Data)) of
-          [] ->
-            {ok, Data};
-          InvalidNames ->
-            case maps:get(invalid_member_handling, Options, error) of
-              error ->
-                {error, {invalid_names, InvalidNames}};
-              keep ->
-                {ok, Data};
-              remove ->
-                {ok, maps:with(ValidNames, Data)}
-            end
-          end;
+        generate_check_members(Value, Members, Options);
       _ ->
-        {ok, Data}
+        {ok, Value}
     end
   catch
     throw:{error, Reason} ->
@@ -226,6 +213,25 @@ generate(Term, State) when is_map(Term) ->
   end;
 generate(_, _) ->
   error.
+
+-spec generate_check_members(json:value(), #{atom() := jsv:definition()},
+                             jsv:options()) ->
+        {ok, json:value()} | {error, jsv:generation_error_reason()}.
+generate_check_members(Value, Members, Options) ->
+  ValidNames = maps:keys(Members),
+  case maps:keys(maps:without(ValidNames, Value)) of
+    [] ->
+      {ok, Value};
+    InvalidNames ->
+      case maps:get(invalid_member_handling, Options, error) of
+        error ->
+          {error, {invalid_members, InvalidNames, Value}};
+        keep ->
+          {ok, Value};
+        remove ->
+          {ok, maps:with(ValidNames, Value)}
+      end
+  end.
 
 -spec member_definition(binary(), jsv:definition()) ->
         {ok, jsv:definition()} | error.
