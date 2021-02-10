@@ -1,6 +1,6 @@
 [{<<"json">>,
   {git,"https://github.com/galdor/erl-json.git",
-       {ref,"d87dcca03f17ea18d79badcedc1d9abde842a24d"}},
+       {ref,"6549a08a4ece8ed2fc2d8857cfe722546be5fec8"}},
   0},
  {<<"ksuid">>,
   {git,"https://github.com/exograd/erl-ksuid.git",

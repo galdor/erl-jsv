@@ -214,9 +214,9 @@ generate(Term, State) when is_map(Term) ->
 generate(_, _) ->
   error.
 
--spec generate_check_members(json:value(), jsv:constraints(),
+-spec generate_check_members(json:object(), jsv:constraints(),
                              jsv:options()) ->
-        {ok, json:value()} | {error, jsv:generation_error_reason()}.
+        {ok, json:object()} | {error, jsv:generation_error_reason()}.
 generate_check_members(Value, Constraints = #{members := Members}, Options) ->
   ValidNames = maps:keys(Members),
   case maps:keys(maps:without(ValidNames, Value)) of
