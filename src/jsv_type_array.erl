@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/4, canonicalize/3, generate/2]).
+         validate_type/2, validate_constraint/4, canonicalize/3, generate/2]).
 
 -export_type([constraint/0]).
 
@@ -54,9 +54,9 @@ format_constraint_violation({unique_elements, true}, _) ->
 format_constraint_violation({unique_elements, false}, _) ->
   {"value must contain at least one duplicate element", []}.
 
-validate_type(Value) when is_list(Value) ->
-  {ok, []};
-validate_type(_) ->
+validate_type(Value, _) when is_list(Value) ->
+  {ok, Value, []};
+validate_type(_, _) ->
   error.
 
 validate_constraint(Value, {element, ElementType}, CData, State) ->

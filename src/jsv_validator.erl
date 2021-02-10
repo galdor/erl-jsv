@@ -14,7 +14,8 @@
 
 -module(jsv_validator).
 
--export([init/3, validate/1, validate_child/4]).
+-export([init/3, validate/1, validate_child/4,
+         state_options/1]).
 
 -export_type([state/0, canonicalization_data/0]).
 
@@ -71,22 +72,25 @@ validate(State = #{value := Value,
                    definition := (Definition = {TypeName, _, _}),
                    type_map := TypeMap}) ->
   Module = maps:get(TypeName, TypeMap),
-  ValidateValue = fun (InputValue, CData) ->
-                      case
-                        validate_constraints(InputValue, Module, CData, State)
-                      of
-                        {ok, CData2} ->
-                          Term = canonicalize(Module, Value, CData2, State),
-                          maybe_extra_validate(Term, Definition);
-                        {error, Errors} ->
-                          {error, Errors}
-                      end
-                  end,
-  case Module:validate_type(Value) of
+  ValidateValue =
+    fun (InputValue, CData) ->
+        case
+          validate_constraints(InputValue, Module, CData, State)
+        of
+          {ok, CData2} ->
+            Term = canonicalize(Module, InputValue, CData2, State),
+            maybe_extra_validate(Term, Definition);
+          {error, Errors} ->
+            {error, Errors}
+        end
+    end,
+  case Module:validate_type(Value, State) of
     ok ->
       ValidateValue(Value, undefined);
-    {ok, CData} ->
-      ValidateValue(Value, CData);
+    {ok, Value2} ->
+      ValidateValue(Value2, undefined);
+    {ok, Value2, CData} ->
+      ValidateValue(Value2, CData);
     error ->
       {error, [value_error(State, {invalid_type, TypeName})]}
   end.
@@ -177,3 +181,7 @@ constraint_violation(State, Type, Constraint, Details) ->
 -spec value_error(state(), jsv:value_error_reason()) -> jsv:value_error().
 value_error(#{value := Value, pointer := Pointer}, Reason) ->
   #{reason => Reason, value => Value, pointer => Pointer}.
+
+-spec state_options(state()) -> jsv:options().
+state_options(#{options := Options}) ->
+  Options.

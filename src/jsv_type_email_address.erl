@@ -16,9 +16,9 @@
 
 -behaviour(jsv_type).
 
--export([validate_type/1, generate/2]).
+-export([validate_type/2, generate/2]).
 
-validate_type(Value) when is_binary(Value) ->
+validate_type(Value, _) when is_binary(Value) ->
   %% We use a minimal regular expression on purpose: real email validation is
   %% incredibly complex and it always ends up being a trade off between
   %% supporting obscure formats and rejecting common user mistakes.
@@ -31,7 +31,7 @@ validate_type(Value) when is_binary(Value) ->
     nomatch ->
       error
   end;
-validate_type(_) ->
+validate_type(_, _) ->
   error.
 
 generate(Term, _) when is_binary(Term) ->

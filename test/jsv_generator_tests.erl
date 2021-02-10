@@ -114,7 +114,15 @@ generate_object_test_() ->
                           #{foo => <<"bar">>, bar => <<"foo">>}}},
                  jsv:generate(#{foo => <<"bar">>, bar => <<"foo">>},
                               {object, #{members => #{foo => string}}},
-                              #{invalid_member_handling => error}))].
+                              #{invalid_member_handling => error})),
+   ?_assertEqual({ok, #{a => 1}},
+                 jsv:generate(#{a => 1, b => null},
+                              {object, #{value => integer}},
+                              #{null_member_handling => remove})),
+   ?_assertEqual({ok, #{a => 1, b => null}},
+                 jsv:generate(#{a => 1, b => null},
+                              {object, #{value => {one_of, [integer, null]}}},
+                              #{null_member_handling => keep}))].
 
 generate_uuid_test_() ->
   [?_assertEqual({ok, <<"da0d1078-d2cb-4001-9009-0bb953f75dcb">>},

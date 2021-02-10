@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/4, canonicalize/3, generate/2,
+         validate_type/2, validate_constraint/4, canonicalize/3, generate/2,
          format_datetime/1, is_valid_datetime/1]).
 
 -export_type([constraint/0]).
@@ -48,15 +48,15 @@ format_constraint_violation({min, Min}, _) ->
 format_constraint_violation({max, Max}, _) ->
   {"value must be lower or equal to ~s", [format_datetime(Max)]}.
 
-validate_type(Value) when is_binary(Value) ->
+validate_type(Value, _) when is_binary(Value) ->
   try
     String = binary_to_list(Value),
-    {ok, calendar:rfc3339_to_system_time(String)}
+    {ok, Value, calendar:rfc3339_to_system_time(String)}
   catch
     error:_ ->
       error
   end;
-validate_type(_) ->
+validate_type(_, _) ->
   error.
 
 validate_constraint(_, {min, Min}, SystemTime, _) ->

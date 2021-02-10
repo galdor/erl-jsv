@@ -283,6 +283,11 @@ For `jsv:validate/3`, the following options are available:
   - `keep`: return invalid members in the canonical value.
   - `remove`: silently remove invalid members from the canonical value.
   The default value is `error`.
+- `null_member_handling`: an atom indicating how to null object members; valid
+  values are:
+  - `keep`: keep null object members.
+  - `remove`: remove null object members before verification or generation.
+  The default value is `keep`.
 
 ## Generation
 The `jsv:generate/2` and `jsv:generate/3` functions generate JSON values from

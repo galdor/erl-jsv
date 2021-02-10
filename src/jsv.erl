@@ -70,9 +70,11 @@
                      format_value_errors => boolean(),
                      disable_verification => boolean(),
                      catalog => catalog_name(),
-                     invalid_member_handling => invalid_member_handling()}.
+                     invalid_member_handling => invalid_member_handling(),
+                     null_member_handling => null_member_handling()}.
 
 -type invalid_member_handling() :: error | keep | remove.
+-type null_member_handling() :: keep | remove.
 
 -type definition_error_reason() ::
         {invalid_format, term()}

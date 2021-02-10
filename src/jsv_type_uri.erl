@@ -16,18 +16,18 @@
 
 -behaviour(jsv_type).
 
--export([validate_type/1, generate/2]).
+-export([validate_type/2, generate/2]).
 
-validate_type(<<"">>) ->
+validate_type(<<"">>, _) ->
   error;
-validate_type(Value) when is_binary(Value) ->
+validate_type(Value, _) when is_binary(Value) ->
   case uri_string:parse(Value) of
     URI when is_map(URI) ->
       ok;
     {error, _, _} ->
       error
   end;
-validate_type(_) ->
+validate_type(_, _) ->
   error.
 
 generate(Term, _) when is_binary(Term) ->

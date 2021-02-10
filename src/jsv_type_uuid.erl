@@ -16,16 +16,16 @@
 
 -behaviour(jsv_type).
 
--export([validate_type/1, canonicalize/3, generate/2]).
+-export([validate_type/2, canonicalize/3, generate/2]).
 
-validate_type(Value) when is_binary(Value) ->
+validate_type(Value, _) when is_binary(Value) ->
   case uuid:parse(Value) of
     {ok, Id} ->
-      {ok, Id};
+      {ok, Value, Id};
     {error, _} ->
       error
   end;
-validate_type(_) ->
+validate_type(_, _) ->
   error.
 
 canonicalize(_, CData, _) ->

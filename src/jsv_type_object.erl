@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/4, canonicalize/3,
+         validate_type/2, validate_constraint/4, canonicalize/3,
          generate/2]).
 
 -export_type([constraint/0]).
@@ -93,9 +93,11 @@ format_constraint_violation({members, _}, {invalid_names, Names}) ->
   {"value must not contain the following members: ~ts",
    [iolist_to_binary(Data)]}.
 
-validate_type(Value) when is_map(Value) ->
-  {ok, Value};
-validate_type(_) ->
+validate_type(Value, State) when is_map(Value) ->
+  Options = jsv_validator:state_options(State),
+  Value2 = maybe_remove_null_members(Value, Options),
+  {ok, Value2, Value2};
+validate_type(_, _) ->
   error.
 
 validate_constraint(Value, {value, ValueType}, CData, State) ->
@@ -183,8 +185,9 @@ validate_constraint(Value, {members, Definitions}, CData, State) ->
 canonicalize(_, CData, _) ->
   CData.
 
-generate(Term, State) when is_map(Term) ->
+generate(Term0, State) when is_map(Term0) ->
   Options = jsv_generator:state_options(State),
+  Term = maybe_remove_null_members(Term0, Options),
   Definition = jsv_generator:state_definition(State),
   F = fun (MemberName, V, Acc) ->
           case member_definition(MemberName, Definition) of
@@ -251,3 +254,13 @@ member_definition(_Name, {_, #{value := Definition}, _}) ->
   {ok, Definition};
 member_definition(_Name, _) ->
   error.
+
+-spec maybe_remove_null_members(json:object(), jsv:options()) ->
+        json:object().
+maybe_remove_null_members(Object, Options) ->
+  case maps:get(null_member_handling, Options, keep) of
+    keep ->
+      Object;
+    remove ->
+      jsv_utils:remove_null_map_entries(Object)
+  end.

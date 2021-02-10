@@ -16,9 +16,9 @@
 
 -behaviour(jsv_type).
 
--export([validate_type/1, generate/2]).
+-export([validate_type/2, generate/2]).
 
-validate_type(Value) ->
+validate_type(Value, _) ->
   case ksuid:is_valid(Value) of
     true -> ok;
     false -> error

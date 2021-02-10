@@ -349,7 +349,15 @@ validate_object_test_() ->
                                 <<"b">> => <<"2020-10-01">>},
                               {object, #{members =>
                                            #{a => date}}},
-                             #{invalid_member_handling => keep}))].
+                             #{invalid_member_handling => keep})),
+   ?_assertEqual({ok, #{<<"a">> => 1}},
+                 jsv:validate(#{<<"a">> => 1, <<"b">> => null},
+                              {object, #{value => integer}},
+                              #{null_member_handling => remove})),
+   ?_assertEqual({ok, #{<<"a">> => 1, <<"b">> => null}},
+                 jsv:validate(#{<<"a">> => 1, <<"b">> => null},
+                              {object, #{value => {one_of, [integer, null]}}},
+                              #{null_member_handling => keep}))].
 
 validate_uuid_test_() ->
   [?_assertEqual({ok, <<202,180,203,128,76,102,78,212,

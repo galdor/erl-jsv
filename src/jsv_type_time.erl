@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/4, canonicalize/3, generate/2,
+         validate_type/2, validate_constraint/4, canonicalize/3, generate/2,
          format_time/1, is_valid_time/1]).
 
 -export_type([constraint/0]).
@@ -48,9 +48,14 @@ format_constraint_violation({min, Min}, _) ->
 format_constraint_violation({max, Max}, _) ->
   {"value must be lower or equal to ~s", [format_time(Max)]}.
 
-validate_type(Value) when is_binary(Value) ->
-  parse_time(Value);
-validate_type(_) ->
+validate_type(Value, _) when is_binary(Value) ->
+  case parse_time(Value) of
+    {ok, Time} ->
+      {ok, Value, Time};
+    error ->
+      error
+  end;
+validate_type(_, _) ->
   error.
 
 validate_constraint(_, {min, Min}, Time, _) ->

@@ -16,11 +16,11 @@
 
 -behaviour(jsv_type).
 
--export([validate_type/1, generate/2]).
+-export([validate_type/2, generate/2]).
 
-validate_type(null) ->
+validate_type(null, _) ->
   ok;
-validate_type(_) ->
+validate_type(_, _) ->
   error.
 
 generate(null, _) ->

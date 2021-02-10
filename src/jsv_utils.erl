@@ -15,7 +15,8 @@
 -module(jsv_utils).
 
 -export([fold_list_with_index/3,
-         call_if_defined/3]).
+         call_if_defined/3,
+         remove_null_map_entries/1]).
 
 -spec fold_list_with_index(fun((Index, Element, Acc) -> Acc), Acc, [Element]) ->
         Acc when
@@ -48,3 +49,7 @@ call_if_defined(Module, Function, Args) ->
     error:undef ->
       undefined
   end.
+
+-spec remove_null_map_entries(map()) -> map().
+remove_null_map_entries(Map) ->
+  maps:filter(fun (_, V) -> V =/= null end, Map).

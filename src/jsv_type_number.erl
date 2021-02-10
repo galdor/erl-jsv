@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/4, generate/2]).
+         validate_type/2, validate_constraint/4, generate/2]).
 
 -export_type([constraint/0]).
 
@@ -41,9 +41,9 @@ format_constraint_violation({min, Min}, _) ->
 format_constraint_violation({max, Max}, _) ->
   {"value must be lower or equal to ~0tp", [Max]}.
 
-validate_type(Value) when is_number(Value) ->
+validate_type(Value, _) when is_number(Value) ->
   ok;
-validate_type(_) ->
+validate_type(_, _) ->
   error.
 
 validate_constraint(Value, {min, Min}, _, _) ->

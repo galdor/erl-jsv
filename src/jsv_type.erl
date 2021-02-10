@@ -30,9 +30,10 @@
                                       jsv:constraint_violation_details()) ->
   unicode:chardata() | {io:format(), [term()]}.
 
--callback validate_type(json:value()) -> Result when
+-callback validate_type(json:value(), jsv_validator:state()) -> Result when
     Result :: ok
-            | {ok, jsv_validator:canonicalization_data()}
+            | {ok, json:value()}
+            | {ok, json:value(), jsv_validator:canonicalization_data()}
             | error.
 
 -callback validate_constraint(InputValue,

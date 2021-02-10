@@ -16,11 +16,11 @@
 
 -behaviour(jsv_type).
 
--export([validate_type/1, generate/2]).
+-export([validate_type/2, generate/2]).
 
-validate_type(Value) when is_boolean(Value) ->
+validate_type(Value, _) when is_boolean(Value) ->
   ok;
-validate_type(_) ->
+validate_type(_, _) ->
   error.
 
 generate(Term, _) when is_boolean(Term) ->

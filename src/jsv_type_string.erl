@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/4, canonicalize/3,
+         validate_type/2, validate_constraint/4, canonicalize/3,
          generate/2]).
 
 -export_type([constraint/0]).
@@ -82,9 +82,9 @@ format_constraint_violation({values, Values}, _) ->
   Data = lists:join(<<", ">>, Strings),
   {"value must be one of the following strings: \"~ts\"", [Data]}.
 
-validate_type(Value) when is_binary(Value) ->
-  {ok, Value};
-validate_type(_) ->
+validate_type(Value, _) when is_binary(Value) ->
+  {ok, Value, Value};
+validate_type(_, _) ->
   error.
 
 validate_constraint(Value, {min_length, Min}, _, _) ->

@@ -17,7 +17,7 @@
 -behaviour(jsv_type).
 
 -export([verify_constraint/2, format_constraint_violation/2,
-         validate_type/1, validate_constraint/4]).
+         validate_type/2, validate_constraint/4]).
 
 -export_type([constraint/0]).
 
@@ -31,7 +31,7 @@ verify_constraint(_, _) ->
 format_constraint_violation({value, ExpectedValue}, _) ->
   {"value must be equal to ~0tp", [ExpectedValue]}.
 
-validate_type(_) ->
+validate_type(_, _) ->
   ok.
 
 validate_constraint(Value, {value, ExpectedValue}, _, _) ->
