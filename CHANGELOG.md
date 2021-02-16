@@ -6,7 +6,7 @@
 - Add experimental support for an extra set of data in type definitions. Use
   it for generation and validation functions.
 - Add a `unique_elements` constraint for arrays.
-- Add an `invalid_member_handling` option to control how to handle object
+- Add an `unknown_member_handling` option to control how to handle object
   members which are not part of the `members` constraint.
 - Check object member validity during generation
 - Add a `null_member_handling` option to control whether to keep or remove

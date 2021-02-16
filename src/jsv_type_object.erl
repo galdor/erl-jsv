@@ -169,7 +169,7 @@ validate_constraint(Value, {members, Definitions}, CData, State) ->
           {ok, CData4};
         InvalidNames ->
           Options = maps:get(options, State),
-          case maps:get(invalid_member_handling, Options, error) of
+          case maps:get(unknown_member_handling, Options, error) of
             error ->
               {invalid, {invalid_names, InvalidNames}};
             keep ->
@@ -232,7 +232,7 @@ generate_check_members(Value, Constraints = #{members := Members}, Options) ->
           {error, {missing_members, MissingNames, Value}}
       end;
     InvalidNames ->
-      case maps:get(invalid_member_handling, Options, error) of
+      case maps:get(unknown_member_handling, Options, error) of
         error ->
           {error, {invalid_members, InvalidNames, Value}};
         keep ->

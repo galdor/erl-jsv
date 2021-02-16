@@ -31,7 +31,7 @@
               constraints/0, constraint/0,
               constraint_name/0, constraint_value/0,
               extra/0, validate_fun/0, generate_fun/0,
-              options/0, invalid_member_handling/0,
+              options/0, unknown_member_handling/0,
               definition_error_reason/0,
               value_error/0, value_error_reason/0,
               constraint_violation_details/0,
@@ -70,10 +70,10 @@
                      format_value_errors => boolean(),
                      disable_verification => boolean(),
                      catalog => catalog_name(),
-                     invalid_member_handling => invalid_member_handling(),
+                     unknown_member_handling => unknown_member_handling(),
                      null_member_handling => null_member_handling()}.
 
--type invalid_member_handling() :: error | keep | remove.
+-type unknown_member_handling() :: error | keep | remove.
 -type null_member_handling() :: keep | remove.
 
 -type definition_error_reason() ::

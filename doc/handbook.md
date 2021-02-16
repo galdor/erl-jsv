@@ -277,7 +277,7 @@ For `jsv:validate/3`, the following options are available:
   values.
 - `disable_verification`: do not verify the definition before validation.
 - `catalogs`: a set of catalogs to use during verification and validation.
-- `invalid_member_handling`: an atom indicating how to handle invalid keys in
+- `unknown_member_handling`: an atom indicating how to handle invalid keys in
   objects with a `members` constraint; valid values are:
   - `error`: return an error when at least one invalid member is found.
   - `keep`: return invalid members in the canonical value.
@@ -349,7 +349,7 @@ For `jsv:generate/3`, the following options are available:
 - `type_map`: the type map to use (default: `jsv:default_type_map()`).
 - `disable_verification`: do not verify the definition before generation.
 - `catalogs`: a set of catalogs to use during verification and generation.
-- `invalid_member_handling`: an atom indicating how to handle invalid keys in
+- `unknown_member_handling`: an atom indicating how to handle unknown keys in
   objects with a `members` constraint; valid values are:
   - `error`: return an error when at least one invalid member is found.
   - `keep`: return invalid members in the canonical value.
