@@ -43,7 +43,7 @@ verify_constraint({unique_elements, _}, _) ->
 verify_constraint(_, _) ->
   unknown.
 
-format_constraint_violation({min_length, 0}, _) ->
+format_constraint_violation({min_length, 1}, _) ->
   "value must contain at least 1 element";
 format_constraint_violation({min_length, Min}, _) ->
   {"value must contain at least ~0tp elements", [Min]};
