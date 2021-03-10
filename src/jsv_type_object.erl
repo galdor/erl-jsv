@@ -77,6 +77,8 @@ verify_constraint({members, _}, _) ->
 verify_constraint(_, _) ->
   unknown.
 
+format_constraint_violation({min_size, 0}, _) ->
+  "value must contain at least 1 member";
 format_constraint_violation({min_size, Min}, _) ->
   {"value must contain at least ~0tp members", [Min]};
 
