@@ -115,6 +115,11 @@ maybe_extra_validate(Term, {_, _, #{validate := Validate}}, Pointer) ->
   case Validate(Term) of
     {ok, Term2} ->
       {ok, Term2};
+    {error, {invalid_value, ChildPointer, Reason, ReasonString}} ->
+      {error, [#{reason => {invalid_value, Reason, ReasonString},
+                 reason_string => ReasonString,
+                 value => Term,
+                 pointer => ChildPointer}]};
     {error, Error = {invalid_value, _, ReasonString}} ->
       {error, [#{reason => Error,
                  reason_string => ReasonString,
