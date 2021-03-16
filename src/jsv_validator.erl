@@ -69,7 +69,6 @@ validate(State = #{definition := TypeName}) when is_atom(TypeName) ->
 validate(State = #{definition := {TypeName, Constraints}}) ->
   validate(State#{definition => {TypeName, Constraints, #{}}});
 validate(State = #{value := Value,
-                   pointer := Pointer,
                    definition := (Definition = {TypeName, _, _}),
                    type_map := TypeMap}) ->
   Module = maps:get(TypeName, TypeMap),
@@ -80,7 +79,7 @@ validate(State = #{value := Value,
         of
           {ok, CData2} ->
             Term = canonicalize(Module, InputValue, CData2, State),
-            maybe_extra_validate(Term, Definition, Pointer);
+            maybe_extra_validate(Term, Definition);
           {error, Errors} ->
             {error, Errors}
         end
@@ -109,9 +108,9 @@ canonicalize(Module, Value, CData, State) ->
       Value
   end.
 
--spec maybe_extra_validate(term(), jsv:definition(), json_pointer:pointer()) ->
+-spec maybe_extra_validate(term(), jsv:definition()) ->
         {ok, term()} | {error, [jsv:value_error()]}.
-maybe_extra_validate(Term, {_, _, #{validate := Validate}}, Pointer) ->
+maybe_extra_validate(Term, {_, _, #{validate := Validate}}) ->
   case Validate(Term) of
     {ok, Term2} ->
       {ok, Term2};
@@ -127,13 +126,13 @@ maybe_extra_validate(Term, {_, _, #{validate := Validate}}, Pointer) ->
                  pointer => []}]};
     {error, {invalid_child, ChildPointer, Errors}} ->
       Errors2 = lists:map(fun (Error = #{pointer := ErrorPointer}) ->
-                              P1 = json_pointer:child(Pointer, ChildPointer),
-                              P2 = json_pointer:child(P1, ErrorPointer),
-                              Error#{pointer => P2}
+                              Error#{pointer =>
+                                       json_pointer:child(ChildPointer,
+                                                          ErrorPointer)}
                           end, Errors),
       {error, Errors2}
   end;
-maybe_extra_validate(Term, _, _) ->
+maybe_extra_validate(Term, _) ->
   {ok, Term}.
 
 -spec validate_constraints(json:value(), module(), canonicalization_data(),
