@@ -625,16 +625,69 @@ validate_catalogs_test_() ->
                   jsv:validate(42, {ref, test, b}))]}.
 
 extra_validate_test_() ->
-  ValidateOddInteger = fun (I) ->
-                           case I rem 2 of
-                             0 -> {ok, I};
-                             1 -> {error, invalid_odd_integer,
-                                   "value is not an odd integer"}
-                           end
-                       end,
+  ValidateOddInteger =
+    fun (I) ->
+        case I rem 2 of
+          0 -> {ok, I};
+          1 -> {error, {invalid_value, invalid_odd_integer,
+                        "value is not an odd integer"}}
+        end
+    end,
   Def = {integer, #{}, #{validate => ValidateOddInteger}},
   [?_assertMatch({ok, 42},
                  jsv:validate(42, Def)),
    ?_assertMatch({error, [#{reason :=
                               {invalid_value, invalid_odd_integer, _}}]},
                  jsv:validate(1, Def))].
+
+extra_validate_child_test_() ->
+  Validate =
+    fun (Value = #{type := Type, data := Data}) ->
+        DataDef = case Type of
+                    name -> {string, #{min_length => 1}};
+                    score -> {integer, #{min => 0}}
+                  end,
+        case jsv:validate(Data, DataDef) of
+          {ok, Data2} ->
+            {ok, Value#{data => Data2}};
+          {error, Errors} ->
+            {error, {invalid_child, [<<"data">>], Errors}}
+        end
+    end,
+  Def = {object,
+         #{members =>
+             #{type => {string, #{values => [name, score]}},
+               data => any},
+           required =>
+             [type, data]},
+         #{validate => Validate}},
+  [?_assertEqual({ok, #{type => name, data => <<"Bob">>}},
+                 jsv:validate(#{<<"type">> => <<"name">>,
+                                <<"data">> => <<"Bob">>},
+                              Def)),
+   ?_assertEqual({ok, #{type => score, data => 42}},
+                 jsv:validate(#{<<"type">> => <<"score">>,
+                                <<"data">> => 42},
+                              Def)),
+   ?_assertMatch({error, [#{pointer := [<<"data">>],
+                            reason := {invalid_type, string}}]},
+                 jsv:validate(#{<<"type">> => <<"name">>,
+                                <<"data">> => true},
+                              Def)),
+   ?_assertMatch({error, [#{pointer := [<<"data">>],
+                            reason := {constraint_violation, string,
+                                       {min_length, 1}}}]},
+                 jsv:validate(#{<<"type">> => <<"name">>,
+                                <<"data">> => <<>>},
+                              Def)),
+   ?_assertMatch({error, [#{pointer := [<<"data">>],
+                            reason := {invalid_type, integer}}]},
+                 jsv:validate(#{<<"type">> => <<"score">>,
+                                <<"data">> => <<"foo">>},
+                              Def)),
+   ?_assertMatch({error, [#{pointer := [<<"data">>],
+                            reason := {constraint_violation, integer,
+                                       {min, 0}}}]},
+                 jsv:validate(#{<<"type">> => <<"score">>,
+                                <<"data">> => -1},
+                              Def))].

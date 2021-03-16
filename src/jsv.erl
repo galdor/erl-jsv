@@ -61,10 +61,12 @@
 -type extra() :: #{validate => validate_fun(),
                    generate => generate_fun()}.
 
--type validate_fun() :: fun((term()) -> {ok, term()} |
-                                        {error, term(), unicode:chardata()}).
--type generate_fun() :: fun((term()) -> {ok, term()} |
-                                        {error, term()}).
+-type validate_fun() ::
+        fun((term()) -> {ok, term()} |
+                        {error, {invalid_value, term(), unicode:chardata()}} |
+                        {error, {invalid_child, json_pointer:pointer(),
+                                 [jsv:value_error()]}}).
+-type generate_fun() :: fun((term()) -> {ok, term()} | {error, term()}).
 
 -type options() :: #{type_map => type_map(),
                      format_value_errors => boolean(),
