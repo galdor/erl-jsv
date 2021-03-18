@@ -30,7 +30,8 @@
               type/0, type_map/0,
               constraints/0, constraint/0,
               constraint_name/0, constraint_value/0,
-              extra/0, validate_fun/0, generate_fun/0,
+              extra/0, validate_fun/0, validate_fun_result/0,
+              generate_fun/0, generate_fun_result/0,
               options/0, unknown_member_handling/0,
               definition_error_reason/0,
               value_error/0, value_error_reason/0,
@@ -62,13 +63,20 @@
                    generate => generate_fun()}.
 
 -type validate_fun() ::
-        fun((term()) -> {ok, term()} |
-                        {error, {invalid_value, term(), unicode:chardata()}} |
-                        {error, {invalid_value, json_pointer:pointer(),
-                                 term(), unicode:chardata()}} |
-                        {error, {invalid_child, json_pointer:pointer(),
-                                 [jsv:value_error()]}}).
--type generate_fun() :: fun((term()) -> {ok, term()} | {error, term()}).
+        fun((term()) -> validate_fun_result()).
+
+-type validate_fun_result() ::
+        {ok, term()}
+      | {error, {invalid_value, term(), unicode:chardata()}}
+      | {error, {invalid_value, json_pointer:pointer(),
+                 term(), unicode:chardata()}}
+      | {error, {invalid_child, json_pointer:pointer(), [jsv:value_error()]}}.
+
+-type generate_fun() :: fun((term()) -> generate_fun_result()).
+
+-type generate_fun_result() ::
+        {ok, term()}
+      | {error, term()}.
 
 -type options() :: #{type_map => type_map(),
                      format_value_errors => boolean(),
