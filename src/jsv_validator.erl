@@ -69,6 +69,7 @@ validate(State = #{definition := TypeName}) when is_atom(TypeName) ->
 validate(State = #{definition := {TypeName, Constraints}}) ->
   validate(State#{definition => {TypeName, Constraints, #{}}});
 validate(State = #{value := Value,
+                   pointer := Pointer,
                    definition := (Definition = {TypeName, _, _}),
                    type_map := TypeMap}) ->
   Module = maps:get(TypeName, TypeMap),
@@ -79,7 +80,7 @@ validate(State = #{value := Value,
         of
           {ok, CData2} ->
             Term = canonicalize(Module, InputValue, CData2, State),
-            maybe_extra_validate(Term, Definition);
+            maybe_extra_validate(Term, Pointer, Definition);
           {error, Errors} ->
             {error, Errors}
         end
@@ -108,36 +109,43 @@ canonicalize(Module, Value, CData, State) ->
       Value
   end.
 
--spec maybe_extra_validate(term(), jsv:definition()) ->
+-spec maybe_extra_validate(term(), json_pointer:pointer(),
+                           jsv:definition()) ->
         {ok, term()} | {error, [jsv:value_error()]}.
-maybe_extra_validate(Term, {_, _, #{validate := Validate}}) ->
+maybe_extra_validate(Term, Pointer, {_, _, #{validate := Validate}}) ->
   case Validate(Term) of
     {ok, Term2} ->
       {ok, Term2};
     {error, Error} ->
-      {error, validation_error_to_value_errors(Error)}
+      {error, validation_error_to_value_errors(Error, Pointer)}
   end;
-maybe_extra_validate(Term, _) ->
+maybe_extra_validate(Term, _, _) ->
   {ok, Term}.
 
--spec validation_error_to_value_errors(jsv:validation_error()) ->
+-spec validation_error_to_value_errors(jsv:validation_error(),
+                                       json_pointer:pointer()) ->
         [jsv:value_error()].
-validation_error_to_value_errors(Errors) when is_list(Errors) ->
-  lists:flatten(lists:map(fun validation_error_to_value_errors/1, Errors));
-validation_error_to_value_errors({invalid_value, Value,
-                                  Reason, ReasonString}) ->
+validation_error_to_value_errors(Errors, Pointer) when is_list(Errors) ->
+  lists:flatten([validation_error_to_value_errors(Error, Pointer) ||
+                  Error <- Errors]);
+validation_error_to_value_errors({invalid_value, Value, Reason, ReasonString},
+                                 Pointer) ->
   validation_error_to_value_errors({invalid_value, Value, [],
-                                    Reason, ReasonString});
+                                    Reason, ReasonString},
+                                   Pointer);
 validation_error_to_value_errors({invalid_value, Value, ChildPointer,
-                                  Reason, ReasonString}) ->
+                                  Reason, ReasonString},
+                                 Pointer) ->
   [#{reason => {invalid_value, Reason, ReasonString},
      reason_string => ReasonString,
      value => Value,
-     pointer => ChildPointer}];
-validation_error_to_value_errors({invalid_child, ChildPointer, Errors}) ->
+     pointer => json_pointer:child(Pointer, ChildPointer)}];
+validation_error_to_value_errors({invalid_child, ChildPointer, Errors},
+                                 Pointer) ->
+  Pointer2 = json_pointer:child(Pointer, ChildPointer),
   lists:map(fun (Error = #{pointer := ErrorPointer}) ->
                 Error#{pointer =>
-                         json_pointer:child(ChildPointer, ErrorPointer)}
+                         json_pointer:child(Pointer2, ErrorPointer)}
             end, Errors).
 
 -spec validate_constraints(json:value(), module(), canonicalization_data(),
