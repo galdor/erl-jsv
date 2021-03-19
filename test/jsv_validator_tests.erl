@@ -629,7 +629,7 @@ extra_validate_test_() ->
     fun (I) ->
         case I rem 2 of
           0 -> {ok, I};
-          1 -> {error, {invalid_value, invalid_odd_integer,
+          1 -> {error, {invalid_value, I, invalid_odd_integer,
                         "value is not an odd integer"}}
         end
     end,

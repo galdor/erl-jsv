@@ -114,26 +114,31 @@ maybe_extra_validate(Term, {_, _, #{validate := Validate}}) ->
   case Validate(Term) of
     {ok, Term2} ->
       {ok, Term2};
-    {error, {invalid_value, ChildPointer, Reason, ReasonString}} ->
-      {error, [#{reason => {invalid_value, Reason, ReasonString},
-                 reason_string => ReasonString,
-                 value => Term,
-                 pointer => ChildPointer}]};
-    {error, Error = {invalid_value, _, ReasonString}} ->
-      {error, [#{reason => Error,
-                 reason_string => ReasonString,
-                 value => Term,
-                 pointer => []}]};
-    {error, {invalid_child, ChildPointer, Errors}} ->
-      Errors2 = lists:map(fun (Error = #{pointer := ErrorPointer}) ->
-                              Error#{pointer =>
-                                       json_pointer:child(ChildPointer,
-                                                          ErrorPointer)}
-                          end, Errors),
-      {error, Errors2}
+    {error, Error} ->
+      {error, validation_error_to_value_errors(Error)}
   end;
 maybe_extra_validate(Term, _) ->
   {ok, Term}.
+
+-spec validation_error_to_value_errors(jsv:validation_error()) ->
+        [jsv:value_error()].
+validation_error_to_value_errors(Errors) when is_list(Errors) ->
+  lists:flatten(lists:map(fun validation_error_to_value_errors/1, Errors));
+validation_error_to_value_errors({invalid_value, Value,
+                                  Reason, ReasonString}) ->
+  validation_error_to_value_errors({invalid_value, Value, [],
+                                    Reason, ReasonString});
+validation_error_to_value_errors({invalid_value, Value, ChildPointer,
+                                  Reason, ReasonString}) ->
+  [#{reason => {invalid_value, Reason, ReasonString},
+     reason_string => ReasonString,
+     value => Value,
+     pointer => ChildPointer}];
+validation_error_to_value_errors({invalid_child, ChildPointer, Errors}) ->
+  lists:map(fun (Error = #{pointer := ErrorPointer}) ->
+                Error#{pointer =>
+                         json_pointer:child(ChildPointer, ErrorPointer)}
+            end, Errors).
 
 -spec validate_constraints(json:value(), module(), canonicalization_data(),
                            state()) ->

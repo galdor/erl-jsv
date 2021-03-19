@@ -30,7 +30,8 @@
               type/0, type_map/0,
               constraints/0, constraint/0,
               constraint_name/0, constraint_value/0,
-              extra/0, validate_fun/0, validation_result/1,
+              extra/0,
+              validate_fun/0, validation_result/1, validation_error/0,
               generate_fun/0, generation_result/0,
               options/0, unknown_member_handling/0,
               definition_error_reason/0,
@@ -67,10 +68,15 @@
 
 -type validation_result(Value) ::
         {ok, Value}
-      | {error, {invalid_value, term(), unicode:chardata()}}
-      | {error, {invalid_value, json_pointer:pointer(),
-                 term(), unicode:chardata()}}
-      | {error, {invalid_child, json_pointer:pointer(), [jsv:value_error()]}}.
+      | {error, validation_error()}
+      | {error, [validation_error()]}.
+
+-type validation_error() ::
+        {invalid_value, term(),
+         Reason :: term(), ReasonString :: unicode:chardata()}
+      | {invalid_value, term(), json_pointer:pointer(),
+         Reason :: term(), ReasonString :: unicode:chardata()}
+      | {invalid_child, json_pointer:pointer(), [jsv:value_error()]}.
 
 -type generate_fun() :: fun((term()) -> generation_result()).
 
