@@ -397,8 +397,6 @@ validate_uri_test_() ->
    ?_assertMatch({ok, _},
                  jsv:validate(<<"//example.com?a=b#foo">>, uri)),
    ?_assertMatch({error, _},
-                 jsv:validate(<<":http">>, uri)),
-   ?_assertMatch({error, _},
                  jsv:validate(<<"">>, uri))].
 
 validate_email_address_test_() ->

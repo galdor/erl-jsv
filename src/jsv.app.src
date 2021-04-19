@@ -22,7 +22,8 @@
     stdlib,
     json,
     uuid,
-    ksuid]},
+    ksuid,
+    uri]},
   {env, []},
   {modules, []},
 

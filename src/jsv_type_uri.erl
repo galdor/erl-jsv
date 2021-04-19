@@ -21,10 +21,10 @@
 validate_type(<<"">>, _) ->
   error;
 validate_type(Value, _) when is_binary(Value) ->
-  case uri_string:parse(Value) of
-    URI when is_map(URI) ->
+  case uri:parse(Value) of
+    {ok, _} ->
       ok;
-    {error, _, _} ->
+    {error, _} ->
       error
   end;
 validate_type(_, _) ->
