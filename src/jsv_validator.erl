@@ -69,8 +69,7 @@ validate(State = #{definition := TypeName}) when is_atom(TypeName) ->
 validate(State = #{definition := {TypeName, Constraints}}) ->
   validate(State#{definition => {TypeName, Constraints, #{}}});
 validate(State = #{value := Value,
-                   pointer := Pointer,
-                   definition := (Definition = {TypeName, _, _}),
+                   definition := {TypeName, _, _},
                    type_map := TypeMap}) ->
   Module = maps:get(TypeName, TypeMap),
   ValidateValue =
@@ -80,7 +79,7 @@ validate(State = #{value := Value,
         of
           {ok, CData2} ->
             Term = canonicalize(Module, InputValue, CData2, State),
-            maybe_extra_validate(Term, Pointer, Definition);
+            maybe_extra_validate(Term, State);
           {error, Errors} ->
             {error, Errors}
         end
@@ -109,17 +108,25 @@ canonicalize(Module, Value, CData, State) ->
       Value
   end.
 
--spec maybe_extra_validate(term(), json_pointer:pointer(),
-                           jsv:definition()) ->
+-spec maybe_extra_validate(term(), state()) ->
         {ok, term()} | {error, [jsv:value_error()]}.
-maybe_extra_validate(Term, Pointer, {_, _, #{validate := Validate}}) ->
-  case Validate(Term) of
+maybe_extra_validate(Term, #{pointer := Pointer,
+                             definition := {_, _, #{validate := Validate}},
+                             options := Options}) ->
+  Result = if
+             is_function(Validate, 2) ->
+               Arg = maps:get(validate_arg, Options, undefined),
+               Validate(Term, Arg);
+             is_function(Validate, 1) ->
+               Validate(Term)
+           end,
+  case Result of
     {ok, Term2} ->
       {ok, Term2};
     {error, Error} ->
       {error, validation_error_to_value_errors(Error, Pointer)}
   end;
-maybe_extra_validate(Term, _, _) ->
+maybe_extra_validate(Term, _) ->
   {ok, Term}.
 
 -spec validation_error_to_value_errors(jsv:validation_error(),

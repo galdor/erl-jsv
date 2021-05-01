@@ -64,9 +64,9 @@ generate(State = #{definition := TypeName}) when is_atom(TypeName) ->
 generate(State = #{definition := {TypeName, Constraints}}) ->
   generate(State#{definition => {TypeName, Constraints, #{}}});
 generate(State = #{term := Term,
-                   definition := (Definition = {Type, _, _}),
+                   definition := {Type, _, _},
                    type_map := TypeMap}) ->
-  case maybe_extra_generate(Term, Definition) of
+  case maybe_extra_generate(Term, State) of
     {ok, Term2} ->
       Module = maps:get(Type, TypeMap),
       case jsv_utils:call_if_defined(Module, generate, [Term2, State]) of
@@ -83,10 +83,18 @@ generate(State = #{term := Term,
       {error, Reason}
   end.
 
--spec maybe_extra_generate(term(), jsv:definition()) ->
+-spec maybe_extra_generate(term(), state()) ->
         {ok, term()} | {error, jsv:generation_error_reason()}.
-maybe_extra_generate(Term, {_, _, #{generate := Generate}}) ->
-  case Generate(Term) of
+maybe_extra_generate(Term, #{definition := {_, _, #{generate := Generate}},
+                             options := Options}) ->
+  Result = if
+             is_function(Generate, 2) ->
+               Arg = maps:get(generate_arg, Options, undefined),
+               Generate(Term, Arg);
+             is_function(Generate, 1) ->
+               Generate(Term)
+           end,
+  case Result of
     {ok, Term2} ->
       {ok, Term2};
     {error, Reason} ->

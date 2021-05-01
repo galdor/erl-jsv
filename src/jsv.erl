@@ -64,7 +64,8 @@
                    generate => generate_fun()}.
 
 -type validate_fun() ::
-        fun((term()) -> validation_result(term())).
+        fun((term()) -> validation_result(term()))
+      | fun((term(), term()) -> validation_result(term())).
 
 -type validation_result(Value) ::
         {ok, Value}
@@ -78,7 +79,9 @@
          Reason :: term(), ReasonString :: unicode:chardata()}
       | {invalid_child, json_pointer:pointer(), [jsv:value_error()]}.
 
--type generate_fun() :: fun((term()) -> generation_result()).
+-type generate_fun() ::
+        fun((term()) -> generation_result())
+      | fun((term(), term()) -> generation_result()).
 
 -type generation_result() :: {ok, term()} | {error, term()}.
 
@@ -87,7 +90,9 @@
                      disable_verification => boolean(),
                      catalog => catalog_name(),
                      unknown_member_handling => unknown_member_handling(),
-                     null_member_handling => null_member_handling()}.
+                     null_member_handling => null_member_handling(),
+                     validate_arg => term(),
+                     generate_arg => term()}.
 
 -type unknown_member_handling() :: error | keep | remove.
 -type null_member_handling() :: keep | remove.
