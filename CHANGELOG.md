@@ -1,6 +1,8 @@
 % erl-jsv changelog
 
 # Next Version
+
+# 1.3.0
 ## Features
 - Add `jsv:verify_catalog/1` and `jsv:verify_catalog/2`.
 - Add experimental support for an extra set of data in type definitions. Use
