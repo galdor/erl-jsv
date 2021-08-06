@@ -1,6 +1,9 @@
 % erl-jsv changelog
 
 # Next Version
+## Bugs
+- Fix the formatting of the error message produced by violation of string
+  value constraints.
 
 # 1.3.0
 ## Features

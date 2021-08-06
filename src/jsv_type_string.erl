@@ -80,9 +80,9 @@ format_constraint_violation({values, [Value]}, _) ->
   String = json:serialize(atom_to_binary(Value)),
   {"value must be the string \"~ts\"", [String]};
 format_constraint_violation({values, Values}, _) ->
-  Strings = lists:map(fun atom_to_binary/1, Values),
+  Strings = [[$", atom_to_binary(Value), $"] || Value <- Values],
   Data = lists:join(<<", ">>, Strings),
-  {"value must be one of the following strings: \"~ts\"", [Data]}.
+  {"value must be one of the following strings: ~ts", [Data]}.
 
 validate_type(Value, _) when is_binary(Value) ->
   {ok, Value, Value};
